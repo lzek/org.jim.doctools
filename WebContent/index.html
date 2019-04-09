@@ -35,7 +35,7 @@
       <ul class="nav nav-sidebar">          
           <li><a id="Vchouti" class="leftNav" v-on:click='FNav("Vchouti")'>{{ chouti }}</a></li>
           <li><a id="VcreatePapers" class="leftNav" v-on:click='FNav("VcreatePapers")'>{{ createPapers }}</a></li>
-          <!--<li><a id="Vquchong" class="leftNav" v-on:click='FNav("Vquchong")'>{{ quchong }}</a></li>-->
+          <li><a id="Vquchong" class="leftNav" v-on:click='FNav("Vquchong")'>{{ quchong }}</a></li>
           <li><a id="Vpeizhi" class="leftNav" v-on:click='FNav("Vpeizhi")'>{{ peizhi }}</a></li>
           <!--<li><a id="Vtikuguanl" class="leftNav" v-on:click='FNav("Vtikuguanl")'>{{ tikuguanl }}</a></li>-->
           <!--<li><a id="Vclassify" class="leftNav" v-on:click='FNav("Vclassify")'>{{ classify }}</a></li>-->
@@ -56,17 +56,26 @@
 		  <div class="col-md-12 	col-lg-12">
               <div class="col-md-6 	col-lg-6" >缓存文件夹：<input type="text" v-model="p_tempdatabase" v-on:change='changeItem("p_tempdatabase")'/></div>
 			  <div class="col-md-6 	col-lg-6" >试题文件夹：<input type="text" v-model="p_database" v-on:change='changeItem("p_database")'/></div>
-          </div>		  
-        <div class="btn btn-default" @click="choutifunc()">{{  showchoutifilename }}</div>        
-        <div><input id="input-b1" name="input-b1" type="file" class="file" data-browse-on-zone-click="true" v-on:change="changefilename()"></div>
-        <div class="text">{{  choutiresult }}</div>        
+          </div>
+		<div class="col-md-12 	col-lg-12">		  
+			<div class="btn btn-default col-md-4 	col-lg-4" @click="choutifunc()">{{  showchoutifilename }}</div> 
+			<div class="btn btn-default col-md-4 col-md-offset-2	col-lg-4 col-lg-offset-2" @click="choutifuncBatch()">批量从试题池抓题</div> 
+		</div>		
+        <div class="col-md-12 	col-lg-12"><input id="input-b1" name="input-b1" type="file" data-browse-on-zone-click="true" v-on:change="changefilename()"></div>
+        <div class="text col-md-12 	col-lg-12">{{  choutiresult }}</div>        
       </div>
 
-      <div  class=""  v-show="Vquchong">
-          <div class="text"></div>
-        <div class="col-md-6 	col-lg-6 aaa"><textarea id="textarea1" class="form-control" rows="20"></textarea></div>
+      <div  class="col-md-12 	col-lg-12"  v-show="Vquchong">
+		<div class="col-md-12 	col-lg-12">内容重复率大于等于 {{ p_merge_per }} % 视为重复题目，自动从题库中对比删除</div>
+		<div>修改：</div>
+		  <div class="col-md-12 	col-lg-12">以下填写百分比数
+              <div class="col-md-6 	col-lg-6" >内容重复率阈值：<input type="text" v-model="p_merge_per" v-on:change='changeItem("p_merge_per")'/>%</div>
+          </div>
+        <div class="btn btn-default"  @click="quchongfunc()">去除重复试题（依据题库的数量多少，可能较为耗时，请耐心等候）</div>
+        <!--<div class="col-md-6 	col-lg-6 aaa"><textarea id="textarea1" class="form-control" rows="20"></textarea></div>
         <div class="col-md-6 	col-lg-6 bbb"><textarea id="textarea2"  class="form-control" rows="20"></textarea></div>
-        <div class="col-md-2 col-md-offset-10"><button @click="aaa()">test</button><button @click="bbb()">bbb</button></div>        
+        <div class="col-md-2 col-md-offset-10"><button @click="aaa()">test</button><button @click="bbb()">bbb</button></div>-->  
+		<div class="col-md-12 	col-lg-12">{{ quchongresult }}</div>		
       </div>
 
       <div  class="" v-show="VcreatePapers">

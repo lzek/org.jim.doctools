@@ -267,11 +267,11 @@ public class PickupQuestionsAndAnswer {
 	   
 	   log.info("试卷["+fpath+"]题目已经提取到临时库:["+tempdatabasePath+"]");
 	   //tempdatabase去重操作
-	   mergeTitleFolder(tempdatabasePath,tempdatabasePath);
+	   //mergeTitleFolder(tempdatabasePath,tempdatabasePath);
 	   
 	 //合并到databasePath
-	   mergeTitleFolder(databasePath,tempdatabasePath);
-	   
+	  // mergeTitleFolder(databasePath,tempdatabasePath);
+	   docFile.copyDir(tempdatabasePath, databasePath);
 	   File file=new File(tempdatabasePath);
 	   if ( file.exists() && !tempdatabasePath.contentEquals(databasePath)) {
 		   docFile.delFolder(tempdatabasePath);

@@ -19,6 +19,8 @@ var tiku=new Vue({
     Vtikuguanl: false,
     Vpeizhi: false,            
     Vclassify: false,
+	
+	quchongresult:"",
 
     choutifilename:"",
     showchoutifilename:"",
@@ -29,6 +31,8 @@ var tiku=new Vue({
 	progressmask:false,
 
     navshow: true,
+	
+	p_merge_per:"100",
 
 	p_tempdatabase:'',p_database:'',
 	p_school:'',p_semester:'',p_subject:'',p_class:'',p_time:'',
@@ -83,28 +87,30 @@ var tiku=new Vue({
 
 		FInitProperties:function(){
 		  var json={"properties":{}};
-		  $.ajax({
-				type: "get",
-				dataType: "json",
-				contentType:"application/json;charset=utf-8",
-				//url:  "api",
-				url:  "api?command=docProperties",
-				data: JSON.stringify(json),
-				async:false,
-				success: function (data) {
-				  if (tiku.$data.docProperties==""){
-					tiku.$data.docProperties=data;
-					tiku.$data.showProperties.卷首={};
-					tiku.$data.showProperties.试卷规格={};
-					tiku.$data.showProperties.题目顺序={};
-					tiku.$data.showProperties.题目总分={};
-					tiku.$data.showProperties.题目数量={};
-				  }
-				},
-				error:function(data){
-				  console.log(data); 
-				}
-			});
+		  if (tiku.$data.docProperties==""){
+			  $.ajax({
+					type: "get",
+					dataType: "json",
+					contentType:"application/json;charset=utf-8",
+					//url:  "api",
+					url:  "api?command=docProperties",
+					data: JSON.stringify(json),
+					async:false,
+					success: function (data) {
+					  
+						tiku.$data.docProperties=data;
+						tiku.$data.showProperties.卷首={};
+						tiku.$data.showProperties.试卷规格={};
+						tiku.$data.showProperties.题目顺序={};
+						tiku.$data.showProperties.题目总分={};
+						tiku.$data.showProperties.题目数量={};
+					  
+					},
+					error:function(data){
+					  console.log(data); 
+					}
+				});
+			}
 		},
 		FSetShow:function(){
 		  this.databaseProperties.缓存文件夹=this.docProperties.tempdatabase
@@ -145,6 +151,8 @@ var tiku=new Vue({
 		  this.showProperties.不选已用题目=this.docProperties.avoid_used_title
 		  this.p_avoidused=this.docProperties.avoid_used_title
 		  
+		  this.p_merge_per=this.docProperties.单选_merge_per
+		  
 		},	
 		FNav:function(type){
 		  this.FInitProperties();
@@ -172,7 +180,44 @@ var tiku=new Vue({
 		  this.choutifilename=this.choutifilename.split('fakepath') [1].replace('\\','') ;
 		  this.showchoutifilename= "分析抓取试卷题目："+this.choutifilename;
 		},
-		   
+		quchongfunc:function(){
+		  var json={"quchong":{}};		  
+		  this.choutiresult="执行中....";
+		  var vdata=this.data;
+		  $.ajax({
+			  type: "post",
+			  dataType: "json",
+			  //contentType:"application/json;charset=utf-8",
+			  url:  "api",
+			  data: JSON.stringify(json),
+			  async:false,
+			  success: function (data) {
+				tiku.$data.quchongresult=tiku.$data.choutifilename+":"+data.info;         
+			  },
+			  error:function(data){
+				tiku.$data.quchongresult=tiku.$data.choutifilename+" ---- "+data.responseJSON.error; 
+			  }
+		  }); 
+		},   
+		choutifuncBatch:function(){
+		  var json={"pickupBatch":{}};		  
+		  this.choutiresult="执行中....";
+		  var vdata=this.data;
+		  $.ajax({
+			  type: "post",
+			  dataType: "json",
+			  //contentType:"application/json;charset=utf-8",
+			  url:  "api",
+			  data: JSON.stringify(json),
+			  async:false,
+			  success: function (data) {
+				tiku.$data.choutiresult=tiku.$data.choutifilename+":"+data.info;         
+			  },
+			  error:function(data){
+				tiku.$data.choutiresult=tiku.$data.choutifilename+" ---- "+data.responseJSON.error; 
+			  }
+		  }); 
+		},   
 		choutifunc:function(){
 		  var json={"pickup":{"path":this.choutifilename}};
 		  if (this.choutifilename==""){
@@ -344,7 +389,15 @@ var tiku=new Vue({
 			  this.showProperties.不选已用题目=this.p_avoidused
 			  this.docProperties.avoid_used_title=this.p_avoidused
 				break;
-			
+			case "p_merge_per":
+				this.docProperties.单选_merge_per=this.p_merge_per
+			  this.docProperties.简答_merge_per=this.p_merge_per
+			  this.docProperties.判断_merge_per=this.p_merge_per
+			  this.docProperties.填空_merge_per=this.p_merge_per
+			  this.docProperties.不定项_merge_per=this.p_merge_per
+			  this.docProperties.未知_merge_per=this.p_merge_per
+			  this.docProperties.多选_merge_per=this.p_merge_per
+				break;
 			default:
 			  break;
 		  }

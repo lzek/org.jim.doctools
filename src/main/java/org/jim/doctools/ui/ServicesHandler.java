@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.eclipse.jetty.server.Request;
+import org.jim.doctools.merge.MergerFolder;
 import org.jim.doctools.util.Conf;
 import org.jim.doctools.util.FlatFile;
 import org.jim.doctools.util.docFile;
@@ -73,7 +75,8 @@ public class ServicesHandler  extends HttpServlet {
 		  HashMap<String, String> dp=BH.getProperties();
           while(it.hasNext()){  
               String key = (String) it.next();
-              switch(key) {
+              String databasePath;
+			switch(key) {
               case "pickup":
             	  String filename= (String) ((JSONObject)(json.get(key))).get("path");
             	  BH.pickupTitle(filename);
@@ -86,6 +89,25 @@ public class ServicesHandler  extends HttpServlet {
             	  }
             	  BH.createpapers();
             	  responseOutWithJson(response,"{\"info\":\"已生成试卷，请在程序目录下查看\"}",true);
+            	  break;
+              case "quchong":
+            	  databasePath=BH.getProperties().get("database");
+            	  int rcount=mergeTitleFolder(databasePath,databasePath);
+            	  responseOutWithJson(response,"{\"info\":\"已清理["+databasePath+"]下 "+rcount+" 道 重复题目\"}",true); 
+            	  break;
+              case "pickupBatch":
+            	  ArrayList<String>  jList= docFile.getAllFileList("试卷池",".txt");
+            	  String nameString="";
+            	  int count=1;
+            	  for(String xname:jList) {
+            		  BH.pickupTitle("试卷池/"+xname);
+            		  if (nameString.equals("")) {
+            			  nameString=(count++)+"、"+xname;
+            		  }else {
+            			  nameString=nameString+"   "+(count++)+"、"+xname;
+            		  }            		  	   
+            	  }
+            	  responseOutWithJson(response,"{\"info\":\"已成功抽取试卷池的试卷:"+nameString+"\"}",true); 
             	  break;
               case "updateDocProperties": 
             	  JSONObject  ndpitem=(JSONObject) json.get(key);
@@ -103,21 +125,6 @@ public class ServicesHandler  extends HttpServlet {
             	  responseOutWithJson(response,"{\"info\":\"已更新配置\"}",true);
             	  break;
               case "saveDocProperties":
-            	  //Properties prop = new Properties();
-            	  //这儿是获取文件的绝对路径的。
-            	  //File f=new File("app.properties");
-            	  //FileInputStream fileInputStream = new FileInputStream(f);
-            	 // InputStreamReader in = new InputStreamReader(new FileInputStream(f), "UTF-8");   
-            	  //prop.load(in);
-            	//  in.close();
-            	 // OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(f), "UTF-8");   
-            	 // for(String dbkey:dp.keySet()) {
-            	//	  prop.setProperty(dbkey,dp.get(dbkey));
-            	 // }
-            	//store方法，第一个参数是输入流，第二个是提示信息。#Sun Jan 07 18:47:58 CST 2018
-            	  //prop.store(osw, new Date().toString());
-            	///  osw.flush();
-            	 // osw.close();
             	  FlatFile.saveProperties(dp);
             	  responseOutWithJson(response,"{\"info\":\"已写入配置文件 app.properties\"}",true);
             	  break;
@@ -175,7 +182,17 @@ public class ServicesHandler  extends HttpServlet {
         }  
     } 
 
-	
+	  private int mergeTitleFolder(String AFolder,String BFolder) throws Exception {
+		  int result=0;
+		  result=result+  MergerFolder.run(AFolder+"\\单选", BFolder+"\\单选", Float.parseFloat(BH.getProperties().get("单选_merge_per")));
+		  result=result+ MergerFolder.run(AFolder+"\\多选", BFolder+"\\多选",Float.parseFloat( BH.getProperties().get("多选_merge_per")));
+		  result=result+  MergerFolder.run(AFolder+"\\不定项", BFolder+"\\不定项", Float.parseFloat(BH.getProperties().get("不定项_merge_per")));
+		  result=result+  MergerFolder.run(AFolder+"\\判断", BFolder+"\\判断", Float.parseFloat(BH.getProperties().get("判断_merge_per")));
+		  result=result+  MergerFolder.run(AFolder+"\\简答", BFolder+"\\简答",Float.parseFloat( BH.getProperties().get("简答_merge_per")));
+		  result=result+  MergerFolder.run(AFolder+"\\填空", BFolder+"\\填空", Float.parseFloat(BH.getProperties().get("填空_merge_per")));
+		  result=result+  MergerFolder.run(AFolder+"\\未知", BFolder+"\\未知", Float.parseFloat(BH.getProperties().get("未知_merge_per")));
+		  return result;
+	  }
 	
     protected void handle( String target,
             Request baseRequest,
