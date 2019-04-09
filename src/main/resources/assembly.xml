@@ -40,7 +40,7 @@
             <outputDirectory>/试卷池</outputDirectory>  
             <includes>  
                 <include>readme.txt</include>  
-            </includes>  
+            </includes> 
         </fileSet>
         <fileSet>  
             <directory>.</directory>  
