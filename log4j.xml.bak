@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "http://logging.apache.org/log4j/1.2/apidocs/org/apache/log4j/xml/doc-files/log4j.dtd">
+<log4j:configuration>
+    <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d{dd/MM/yy HH:mm:ss:sss}] %t %5p %c{2}: %m%n"/>
+        </layout>
+    </appender>
+
+    <!--自定义appender-->
+    <appender name="logmodel1" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="log/app.log"/>  <!--日志路径-->
+        <param name="Append" value="false"/> <!--是否追加-->
+        <param name="MaxBackupIndex" value="3"/>        <!--最大roll的文件数-->
+        <param name="MaxFileSize" value="10240"/> <!--文件size上限-->
+        <layout class="org.apache.log4j.PatternLayout">          <!--日志输出格式-->
+            <param name="ConversionPattern" value="[%d{dd/MM/yy HH:mm:ss:sss}] %5p %c: %m%n"/>
+        </layout>
+    </appender>
+
+    <!--自定义logger，additivity: 是否遵循缺省的继承机制-->
+    <logger name="model1" additivity="false">
+        <level value="INFO"/>
+        <appender-ref ref="logmodel1"/>
+    </logger>
+    <root>
+        <level value="DEBUG"/>
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</log4j:configuration>

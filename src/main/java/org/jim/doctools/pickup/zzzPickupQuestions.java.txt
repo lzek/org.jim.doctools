@@ -1,0 +1,280 @@
+package org.jim.doctools;
+
+import java.awt.Point;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.jim.doctools.ui.App;
+import org.jim.doctools.util.AppProperties;
+import org.jim.doctools.util.JPoi;
+import org.jim.doctools.util.XwpfWrite;
+
+
+public class PickupQuestions {
+	Logger log = LogManager.getLogger(App.class);
+	
+	PickupQuestions(String [] args){
+		initArgs(args) ;
+		
+	}
+	
+	private HashMap<String,Point> titleStartPosion=new HashMap<String, Point>();
+	private ArrayList<String> sgtitle=new ArrayList<String>();
+	private ArrayList<String> mtitle=new ArrayList<String>();
+	private ArrayList<String> igtitle=new ArrayList<String>();
+	private ArrayList<String> tftitle=new ArrayList<String>();
+	private ArrayList<String> eqtitle=new ArrayList<String>();
+	private ArrayList<String> cmtitle=new ArrayList<String>();
+	private String fpath="";
+	private String type="poi";	
+
+
+    /**
+     * 初始化，使用poi或者docx4处理，记录文档路径
+     * @param args 
+     */
+    private void initArgs(String[] args) {   	
+    	if (AppProperties.containsKey("default")) {
+    		type=AppProperties.get("default");
+    	}
+    	
+    	for(String arg:args){
+    		switch (arg.toLowerCase()) {
+	    		case "/poi":	
+	    		case "/docx4j":
+	    			type=arg.toLowerCase().substring(1);
+	    			break;
+	    		case "/path":
+	    			break;
+    			default:
+    				fpath=arg;	
+    		}
+    	}
+    }
+    
+    /**
+     * 提取试卷全文
+     * @return 试卷全文
+     * @throws Exception 
+     */
+    private  String getExaminationPaperText() throws Exception {
+    	String word=null;
+    	switch (type) {
+		case "poi":
+			word=JPoi.getContext(fpath);
+			break;
+		case "docx4j":
+			log.error("docx4j hasnot used");
+			throw new Exception("docx4j hasnot used");
+		default:
+			word=JPoi.getContext(fpath);	
+    	}
+    	int STX=word.indexOf(2);//文档开始位置
+    	if (STX<0) STX=0;
+    	int ETX=word.indexOf(3);//文档结束位置
+    	if (ETX<0) ETX=word.length();
+    	word=word.substring(STX,ETX);
+    	String[] rgxs=AppProperties.get("docExcludeLine").split("##");
+    	for(String rgx:rgxs) {
+    		Pattern r=Pattern.compile(rgx, Pattern.CASE_INSENSITIVE);
+    		Matcher m = r.matcher(word); 
+    		while(m.find()) {
+    			word=word.replace(word.substring(m.start(),m.end()),"");
+    			m = r.matcher(word);  
+    		}    		 
+    	}
+    	return word;
+    }    
+   
+    
+    /**
+     * 获取各类试题开始位置
+     * @param DocText 文档全文
+     * @return 题目分类位置对象
+     */
+    private  HashMap<String,Point>  getTitleStartPosion(String DocText){
+    	for(String key:AppProperties.keySet()) {
+    		if (key.startsWith("c_")&&!key.contains("-")&&!key.endsWith("_suffix")&&!key.endsWith("_preffix")) {
+    			String value=AppProperties.get(key);
+    			for(String x:value.split(",")) {
+    				//for(Integer i:titleSuffix.keySet()) {
+    					String rgx=AppProperties.get("c_preffix")+x+AppProperties.get("c_suffix");
+    					Pattern r = Pattern.compile(rgx,Pattern.CASE_INSENSITIVE|Pattern.MULTILINE);
+        				Matcher m = r.matcher(DocText);
+        				if (!titleStartPosion.containsKey(key)) titleStartPosion.put(key, new Point(-1,-1));
+        				while(m.find()) {
+        					Point pt=new Point( m.start(), m.end());
+        			         titleStartPosion.put(key, pt);
+        			         log.debug("探测试题类型："+DocText.substring(m.start(), m.end()));
+        			      }
+    				//}    				
+    			}
+    			
+    		}
+    	}
+    	return titleStartPosion;
+    }
+    
+    /**
+     * 根据当前类型的开始和结束标记，返回的当前类型的所有题目
+     * @param titleType 题目类型
+     * @param DocText 文档全文
+     * @return 当前类型的所有题目
+     */
+    private String pickupTargetText(String titleType,String DocText) {    	
+    		Integer titleflagstartpos=titleStartPosion.get(titleType).x;
+    		Integer titleflagendpos=titleStartPosion.get(titleType).y;
+    		
+    		Integer titlestartpos=titleflagendpos+1;   
+    		Integer titleendpos=DocText.length()-1;    		
+    		for(String key2:titleStartPosion.keySet()) {
+    			if (titleStartPosion.get(key2).x>titleflagstartpos && titleStartPosion.get(key2).x<titleendpos) {
+    				titleendpos=titleStartPosion.get(key2).x-1;
+    			}
+    		}
+    		log.debug("pick up "+AppProperties.get(titleType)+" "+titlestartpos+":"+titleendpos);
+    		return DocText.substring(titlestartpos,titleendpos);
+    }
+    
+    /**
+     * 提取题目
+     * @param DocText
+     * @throws Exception 
+     */
+    private void pickupPaperTitle(String DocText) throws Exception {
+    	this.getTitleStartPosion(this.getExaminationPaperText());
+    	
+    	//获取本类型题目开始结束位置
+    	for(String key:titleStartPosion.keySet()) {
+    		if (titleStartPosion.get(key).x<0) {
+    			continue;
+    		}
+    		String titleText=pickupTargetText(key,DocText);
+
+	    	pickupSingleTitle(key,titleText);
+    	}
+    }    
+    
+    /**
+     * 将接收到的分类题目的全文，按照正则拆分成单条题目
+     * @param key 题目分类
+     * @param titleText 分类题目的全文
+     */
+    private void pickupSingleTitle(String key,String titleText) {
+    	
+	    	String rgx=AppProperties.get(key+"-pattern");
+	    	Pattern r = Pattern.compile(rgx,Pattern.DOTALL | Pattern.CASE_INSENSITIVE|Pattern.MULTILINE);
+    	
+		Matcher m =r.matcher(titleText);
+		while(m.find()) {    
+			switch (key) {
+			case "c_singleChoice":
+					sgtitle.add(cleanTitleNum( key,m.group()));
+					break;
+			case "c_multipleChoice":
+				mtitle.add(cleanTitleNum( key,m.group()));
+				break;
+			case "c_indefiniteChoice":
+				igtitle.add(cleanTitleNum( key,m.group()));
+				break;
+			case "c_TFChoice":
+				tftitle.add(cleanTitleNum( key,m.group()));
+				break;
+			case "c_essayQuestion":
+				eqtitle.add(cleanTitleNum( key,m.group()));
+				break;
+			case "c_completion":
+				cmtitle.add(cleanTitleNum( key,m.group()));
+				break;
+				default:
+			}
+		}
+    }
+    
+    
+    /**
+     * 清除单条题目的序号
+     * @param key 题目分类
+     * @param titleText 单条题目
+     * @return 清除了序号的题目
+     */
+    private String  cleanTitleNum(String key,String titleText) {
+    	Pattern r=Pattern.compile(AppProperties.get(key+"-pattern-num"),Pattern.DOTALL | Pattern.CASE_INSENSITIVE|Pattern.MULTILINE) ;
+    	Matcher m =r.matcher(titleText);
+    	String title=titleText;
+		while(m.find()) {    
+			title=titleText.substring(m.end());	
+			break;
+		}
+		return title;
+    }
+    
+    
+    /**
+     * 将试卷中的题目提取后分文件夹存放
+     * @throws Exception 
+     */
+   public void run() throws Exception {
+	   this.pickupPaperTitle(this.getExaminationPaperText());
+	   save(this.sgtitle,AppProperties.get("tempdatabase")+"\\单选","单选");
+	   save(this.mtitle,AppProperties.get("tempdatabase")+"\\多选","多选");
+	   save(this.igtitle,AppProperties.get("tempdatabase")+"\\不定项","不定项");
+	   save(this.tftitle,AppProperties.get("tempdatabase")+"\\判断","判断");
+	   save(this.eqtitle,AppProperties.get("tempdatabase")+"\\简答","简答");
+	   save(this.cmtitle,AppProperties.get("tempdatabase")+"\\填空","填空");
+	   log.info("试卷["+fpath+"]题目已经提取到临时库:["+AppProperties.get("tempdatabase")+"]");
+	   File file=new File(AppProperties.get("database"));
+	   if (!file.exists()) {
+		   (new File(AppProperties.get("tempdatabase"))).renameTo(file);
+		   log.info("临时库:["+AppProperties.get("tempdatabase")+"]已经放入到试题库：["+AppProperties.get("database")+"]");
+	   } else {
+		   log.info("请审核去重后，放入到试题库：["+AppProperties.get("database")+"]");
+	   }
+   }   
+   
+   /**
+    * 将单组题目存放到文件夹中
+    * @param listTitle
+    * @param path 存放路径
+    * @param FileName 文件前缀名
+    */
+   private void save(ArrayList<String> listTitle,String path,String FileName) {
+	   XwpfWrite xw=new XwpfWrite();
+	// 指定路径如果没有则创建并添加
+	   File fileParent = new File(path);
+	   //判断是否存在
+	   if (!fileParent.exists()) {
+		   fileParent.mkdirs();
+	   }
+	   long currentTime=0;
+	   Boolean  blankWithUnderline =false;
+	   if (FileName.equals("填空")) blankWithUnderline=true;
+	   for(String word:listTitle) {
+		   currentTime=System.currentTimeMillis();
+		   try {
+			   switch(FileName) {
+				   case "单选":
+				   case "多选":
+				   case "不定":
+					   word=word.replace("A", "####A");
+					   break;
+					   default:
+			   }
+			   
+			xw.savaPickupQuestions(word,path+"\\"+FileName+"-"+currentTime+".docx",blankWithUnderline);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	   }	   
+   }
+    
+    
+
+}

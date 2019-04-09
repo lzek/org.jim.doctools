@@ -1,0 +1,60 @@
+package org.jim.doctools.ui;
+
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.eclipse.swt.*;
+import org.eclipse.swt.browser.*;
+import org.eclipse.swt.layout.*;
+import org.eclipse.swt.widgets.*;
+
+public class myswt {
+	static Logger log = LogManager.getLogger(myswt.class);
+	public static void go(String [] args) {
+		
+		final String SCRIPT ="document.onmousedown = function(e) {if (!e) {e = window.event;} if (e) {mouseDown(e.clientX, e.clientY);}}";
+		Display display = new Display();
+		final Shell shell = new Shell(display);
+		shell.setLayout(new FillLayout());
+		
+		final Browser browser;
+		try {
+			browser = new Browser(shell, SWT.NONE);
+		} catch (SWTError e) {
+			log.fatal("Could not instantiate Browser: " + e.getMessage());
+			display.dispose();
+			return;
+		}
+		
+		
+		/*
+		browser.addProgressListener(ProgressListener.completed(event -> {			
+			
+			final BrowserFunction function = new CustomFunction(browser, "mouseDown");
+			
+			browser.execute(SCRIPT);
+		}));*/
+	 
+		browser.setUrl("http://localhost:8980/hello");
+		shell.open();
+		
+		
+		while (!shell.isDisposed()) {
+			if (!display.readAndDispatch()) display.sleep();
+		}
+		display.dispose();
+	}
+	 
+	static class CustomFunction extends BrowserFunction {
+		CustomFunction (Browser browser, String name) {
+			super (browser, name);
+		}
+		@Override
+		public Object function (Object[] arguments) {
+			log.info("mouseDown: " + ((Number)arguments[0]).intValue() + "," + ((Number)arguments[1]).intValue());
+			return null;
+		}
+	}
+
+}
+

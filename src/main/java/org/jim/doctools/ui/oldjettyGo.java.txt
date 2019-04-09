@@ -1,0 +1,159 @@
+package org.jim.doctools.ui;
+
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerCollection;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.webapp.WebAppContext;
+//import org.jim.doctools.ui.JettySample.HelloServlet;
+
+public class jettyGo implements Runnable  {
+	private Thread t;
+	   private String threadName;
+	   private  static Logger log = LogManager.getLogger(jettyGo.class);
+	   
+	    public static final int DEFAULT_PORT = 8980;
+	    public static final int DEFAULT_IDLE_TIMEOUT = 30000;
+	    public static final String DEFAULT_COMMAND_URL = "/commands";
+	    private static final String DEFAULT_ADDRESS = "0.0.0.0";
+	   
+	   
+	   public   jettyGo( String name) {
+		      threadName = name;
+		      log.info("Creating " +  threadName );
+		   }
+	   
+	   
+	   
+	   public void run() {
+		   nobody();
+	   }
+	   
+	   private void nobody() {
+		   try {
+			   test3();
+			  // test2();
+			   //test1();
+		   }catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}	   
+	   } 
+	   
+	   private void test3() throws Exception {
+		   Server server = new Server(8980);
+	        ResourceHandler resource_handler = new ResourceHandler();
+	        resource_handler.setDirectoriesListed(true);
+	        resource_handler.setWelcomeFiles(new String[]{ "nihao.html" });
+	        resource_handler.setResourceBase(".");
+	        
+	        ServletHandler handler = new ServletHandler();
+	        handler.addServletWithMapping(HelloServlet.class, "/hello");
+	        
+	        HandlerList handlers = new HandlerList();
+	        resource_handler.setHandler(handler);
+	        //handlers.setHandlers(new Handler[] { resource_handler,new DefaultHandler() });
+	        //server.setHandler(handlers);
+	        server.setHandler(resource_handler);
+	        
+	        server.setStopAtShutdown(true);
+	        server.start();
+	        server.join();
+	   }
+	   
+	   private void test2() throws Exception {
+		   // Create a basic Jetty server object that will listen on port 8080.  Note that if you set this to port 0
+	        // then a randomly available port will be assigned that you can either look in the logs for the port,
+	        // or programmatically obtain it for use in test cases.
+	        Server server = new Server(8980);
+
+	        // Create the ResourceHandler. It is the object that will actually handle the request for a given file. It is
+	        // a Jetty Handler object so it is suitable for chaining with other handlers as you will see in other examples.
+	        ResourceHandler resource_handler = new ResourceHandler();
+
+	        // Configure the ResourceHandler. Setting the resource base indicates where the files should be served out of.
+	        // In this example it is the current directory but it can be configured to anything that the jvm has access to.
+	        resource_handler.setDirectoriesListed(true);
+	        resource_handler.setWelcomeFiles(new String[]{ "nihao.html" });
+	        resource_handler.setResourceBase(".");
+
+	        // Add the ResourceHandler to the server.
+	        HandlerList handlers = new HandlerList();
+	        handlers.setHandlers(new Handler[] { new BusinessHandler(),resource_handler, new DefaultHandler() });
+	        server.setHandler(handlers);
+	        
+	        server.setStopAtShutdown(true);
+	        // Start things up! By using the server.join() the server thread will join with the current thread.
+	        // See "http://docs.oracle.com/javase/1.5.0/docs/api/java/lang/Thread.html#join()" for more details.
+	        server.start();
+	        server.join();
+	   }
+	   
+	   private void test1() throws Exception {
+			   Server server = new Server(8980);
+			   
+			   WebAppContext webapp = new WebAppContext();
+			   webapp.setResourceBase(".");
+			   // 也可以通过设置 war 包的方式
+			   // webapp.setWar("C:/TVPlay.war");
+			   HandlerCollection hc = new HandlerCollection();
+				
+				ServletHandler handler = new ServletHandler();
+				 handler.addServletWithMapping(HelloServlet.class, "/hello");
+				hc.setHandlers(new Handler[] {handler,webapp});
+			   server.setStopAtShutdown(true);
+			   server.setHandler(hc);
+			   server.start();
+			   server.join();
+	   }
+	   
+		public void start () {
+			log.info("Starting " +  threadName );
+		      if (t == null) {
+		         t = new Thread (this, threadName);
+		         t.start ();
+		      }
+		   }
+		
+		@SuppressWarnings("serial")
+	    public   static class HelloServlet extends HttpServlet
+	    {
+			@Override
+	        protected void doGet( HttpServletRequest request,
+	                              HttpServletResponse response ) throws ServletException,
+	                                                            IOException
+	        {
+	            response.setContentType("text/html");
+	            response.setStatus(HttpServletResponse.SC_OK);
+	            response.getWriter().println("<h1>Hello from HelloServlet</h1>");
+	        }
+			
+	        protected void handle( String target,
+                    Request baseRequest,
+                    HttpServletRequest request,
+                    HttpServletResponse response ) throws ServletException,
+	                                                            IOException
+	        {
+	            response.setContentType("text/html");
+	            response.setStatus(HttpServletResponse.SC_OK);
+	            response.getWriter().println("<h1>Hello from HelloServlet</h1><br><a href=\"nihao.html\">nihao<>");
+	            baseRequest.setHandled(true);
+	        }
+	    }
+}

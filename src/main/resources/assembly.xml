@@ -1,0 +1,53 @@
+<assembly>  
+    <!-- 项目打成Zip包的Id -->  
+    <id>bin</id>  
+    <formats>  
+        <!-- 包的后缀 -->  
+        <format>zip</format>  
+    </formats>  
+    <dependencySets>  
+        <!-- 项目依赖包的输出目录，下面为当前目录的lib文件夹下 -->  
+        <dependencySet>  
+            <outputDirectory>/lib</outputDirectory>  
+        </dependencySet>  
+    </dependencySets>  
+    <fileSets>  
+        <!-- 项目一些说明的资源输出的目录，下面为当前目录  
+		<fileSet> 
+            <directory>${JAVA_HOME}/jre</directory>  
+            <outputDirectory>/jre</outputDirectory>   
+            <includes>  
+                <include>**/*.*</include> 
+            </includes>  
+        </fileSet> 	
+       <fileSet> 
+            <directory>target</directory>  
+            <outputDirectory>/</outputDirectory>   
+            <includes>  
+                <include>lib/**/*.*</include> 
+                <include>*.jar</include>  
+            </includes>  
+        </fileSet>  
+        <fileSet>  
+            <directory>WebContent</directory>  
+            <outputDirectory>/</outputDirectory>  
+            <includes>  
+                <include>**/*.*</include>  
+            </includes>  
+        </fileSet> 
+        <fileSet>  
+            <directory>.</directory>  
+            <outputDirectory>/</outputDirectory>  
+            <includes>  
+                <include>startApp.bat</include>
+				<include>*.ini</include>
+				<include>*.xml</include>
+				<include>template*.docx</include>
+				<include>*.properties</include> 
+            </includes>
+			<excludes>
+				<exclude>pom.xml</exclude>
+			</excludes>	
+        </fileSet>  -->
+    </fileSets>  
+</assembly> 
