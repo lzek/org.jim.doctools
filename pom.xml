@@ -60,20 +60,20 @@
     <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-server</artifactId>
-        <version>9.4.8.v20171121</version>
+        <version>9.4.12.v20180830</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.eclipse.jetty/jetty-servlet -->
     <dependency>
         <groupId>org.eclipse.jetty</groupId>
         <artifactId>jetty-servlet</artifactId>
-        <version>9.4.8.v20171121</version>
+        <version>9.4.12.v20180830</version>
     </dependency>
     
     <dependency>
 	  <groupId>org.eclipse.jetty</groupId>
 	  <artifactId>jetty-webapp</artifactId>
-	  <version>9.4.11.v20180605</version>
+	  <version>9.4.12.v20180830</version>
 	</dependency>
     
 	<dependency>
