@@ -68,7 +68,7 @@
       <div  class="col-md-12 	col-lg-12"  v-show="Vquchong">
 		<div class="col-md-12 	col-lg-12">内容重复率大于等于 {{ p_merge_per }} % 视为重复题目，自动从题库中对比删除</div>
 		<div>修改：</div>
-		  <div class="col-md-12 	col-lg-12">以下填写百分比数
+		  <div class="col-md-12 	col-lg-12">（填写百分比数）
               <div class="col-md-6 	col-lg-6" >内容重复率阈值：<input type="text" v-model="p_merge_per" v-on:change='changeItem("p_merge_per")'/>%</div>
           </div>
         <div class="btn btn-default"  @click="quchongfunc()">去除重复试题（依据题库的数量多少，可能较为耗时，请耐心等候）</div>

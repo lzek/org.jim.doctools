@@ -1,5 +1,6 @@
 package org.jim.doctools.util;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -263,19 +264,24 @@ public class XwpfWrite {
 		   			allword_answer=count+"、"+qaword+"####答案："+answer;
 		   			break;
 		   		}
-		   		setFormatText(filePath,allword,bold,fontsize,type);
-		   		setFormatText(filePath+"_答案",allword_answer,bold,fontsize,type);
+		   		formatThenSave(filePath,allword,bold,fontsize,type);
+		   		formatThenSave(filePath+"_答案",allword_answer,bold,fontsize,type);
 		   	}		     
 	   }
 	   
 	   public  void setQuestionsTitle(String filePath,String word) throws Exception {
 		   Boolean bold=true;
 		   int fontsize=18;
-		      setFormatText(filePath,word,bold,fontsize,"title");
+		      formatThenSave(filePath,word,bold,fontsize,"title");
 	   }
 	   
-	   public  void setFormatText(String filePath,String word,Boolean bold,int fontsize,String type) throws Exception {
-	   		InputStream is = new FileInputStream(filePath+".docx");
+	   public  void formatThenSave(String filePath,String word,Boolean bold,int fontsize,String type) throws Exception {
+		   File targetFile=new File(filePath+".docx");
+		   File ppath=targetFile.getParentFile();
+		   if (!ppath.exists()) {
+			   ppath.mkdirs();
+		   }
+	   		InputStream is = new FileInputStream(targetFile);
 	      XWPFDocument doc = new XWPFDocument(is);
 	      XWPFParagraph np=doc.createParagraph();	      
 	      /*
@@ -323,8 +329,8 @@ public class XwpfWrite {
 	    	  }
 		      nr.setText(nw);
 		      nr.addCarriageReturn();
-	      }	      
-	      OutputStream os = new FileOutputStream(filePath+".docx");
+	      }	
+	      OutputStream os = new FileOutputStream(targetFile);
 	      doc.write(os);
 	      doc.close();
 	      this.close(os); 
@@ -350,6 +356,11 @@ public class XwpfWrite {
 	   
 	   public  void setExamTitle(String filePath, Map<String, String> params) throws Exception {
 		   		String output=filePath+".docx";
+		   		File targetFile=new File(output);
+				   File ppath=targetFile.getParentFile();
+				   if (!ppath.exists()) {
+					   ppath.mkdirs();
+				   }
 		   		String templatepath=AppProperties.get("template");
 		   		if (templatepath==null||templatepath.equals("")) {
 		   			templatepath="template.docx";

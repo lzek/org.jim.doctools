@@ -241,7 +241,7 @@ public class CreatePapers {
 	 */
 	@SuppressWarnings("unchecked")
 	public void run() throws Exception {
-		String newpath=docProperties.get("file_prefix");
+		String newpath="输出目录/"+docProperties.get("file_prefix");
 		if (newpath.equals("template")) {
 			log.error("新文件名不可以是template");
 	    	  throw new Exception("新文件名不可以是template");

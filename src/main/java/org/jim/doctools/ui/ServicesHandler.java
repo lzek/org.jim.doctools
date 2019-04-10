@@ -79,7 +79,7 @@ public class ServicesHandler  extends HttpServlet {
 			switch(key) {
               case "pickup":
             	  String filename= (String) ((JSONObject)(json.get(key))).get("path");
-            	  BH.pickupTitle(filename);
+            	  BH.pickupTitle("试卷池/"+filename);
             	  responseOutWithJson(response,"{\"info\":\"已成功抽取题目\"}",true);
             	  break;
               case "createpapers":            	  
@@ -88,7 +88,7 @@ public class ServicesHandler  extends HttpServlet {
             		  throw new Exception("配置文件database指定的试题存放目录[ "+dp.get("database")+" ]不存在,请先用 [ 试卷抓题 ] 生成试题存放目录");
             	  }
             	  BH.createpapers();
-            	  responseOutWithJson(response,"{\"info\":\"已生成试卷，请在程序目录下查看\"}",true);
+            	  responseOutWithJson(response,"{\"info\":\"已生成试卷，请在程序 输出目录 下查看\"}",true);
             	  break;
               case "quchong":
             	  databasePath=BH.getProperties().get("database");

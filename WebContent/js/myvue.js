@@ -178,7 +178,7 @@ var tiku=new Vue({
 		changefilename: function () {
 		  this.choutifilename = $("#input-b1").val(); 
 		  this.choutifilename=this.choutifilename.split('fakepath') [1].replace('\\','') ;
-		  this.showchoutifilename= "分析抓取试卷题目："+this.choutifilename;
+		  this.showchoutifilename= "抓取试卷池指定试卷："+this.choutifilename;
 		},
 		quchongfunc:function(){
 		  var json={"quchong":{}};		  
@@ -494,7 +494,7 @@ var tiku=new Vue({
     tiku.FSetShow();
 	tiku.FgetTemplateList();
 	tiku.setVisabled("Vchouti");
-	tiku.$data.showchoutifilename= "分析抓取试卷题目：";
+	tiku.$data.showchoutifilename= "抓取试卷池指定试卷：";
 	$("#loadingModal").modal('hide');
 	}	
 )()
