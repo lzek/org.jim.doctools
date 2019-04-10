@@ -28,6 +28,7 @@ import org.eclipse.jetty.server.Request;
 import org.jim.doctools.merge.MergerFolder;
 import org.jim.doctools.util.Conf;
 import org.jim.doctools.util.FlatFile;
+import org.jim.doctools.util.JPoi;
 import org.jim.doctools.util.docFile;
 
 import net.sf.json.JSONObject;
@@ -155,6 +156,25 @@ public class ServicesHandler extends HttpServlet {
 				}
 					
 					responseOutWithJson(response, docxList, true);
+					break;
+				case "docxTitle":
+					String docxName = (String)(json.get(key));
+					String docxName_answer=docxName.replace(".docx", "_answer.docx");
+					JPoi jpoi=new JPoi();
+ 					ArrayList<String> title=jpoi.getContextRows(docxName);
+ 					String titleword="";
+ 					String answerword="";
+ 					for(String x:title) {
+ 						titleword=titleword+x;
+ 					}
+					ArrayList<String> answer=jpoi.getContextRows(docxName_answer);
+					for(String x:answer) {
+						answerword=answerword+x;
+ 					}
+					titleword=titleword.replaceAll("[\\r\\n]", "####");
+					answerword=answerword.replaceAll("[\\r\\n]", "####");
+					String jsonword="{\"title\":\""+titleword+"\",\"answer\":\""+answerword+"\"}";
+					responseOutWithJson(response,jsonword , true);
 					break;
 				default:
 					responseOutWithJson(response, "{\"info\":\"null\"}", true);

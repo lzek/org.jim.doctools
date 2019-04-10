@@ -52,7 +52,14 @@ var tiku = new Vue({
 		guanliContentList: ["全部", "只显示无答案问题", "显示未分类问题", "只显示含答案问题"],
 
 		docxList: {},
-		docxListCount:[{code:"单选",value:0},{code:"多选",value:0},{code:"填空",value:0},{code:"判断",value:0},{code:"简答",value:0},{code:"不定项",value:0},{code:"未知",value:0}]
+		docxListCount:[{code:"单选",value:0},
+		{code:"多选",value:0},
+		{code:"填空",value:0},
+		{code:"判断",value:0},
+		{code:"简答",value:0},
+		{code:"不定项",value:0},
+		{code:"未知",value:0}],
+		currentDocx:""
 
 
 	},
@@ -557,8 +564,41 @@ var tiku = new Vue({
 			{code:"判断",value:this.docxList.判断.length},
 			{code:"简答",value:this.docxList.简答.length},
 			{code:"不定项",value:this.docxList.不定项.length},
-			{code:"未知",value:this.docxList.未知.length}]
+			{code:"未知",value:this.docxList.未知.length}];
+			if (this.docxList.单选.length>0) {
+				this.currentDocx="试题库/单选/"+this.docxList.单选[0];
+			}
+			if (this.currentDocx!="") {
+				this.showtitle(this.currentDocx);
+			}
 		},
+		replaceAll(a,b,c){
+			var d=a.replace(b,c);
+			for(i=0;i<10;i++){
+				d=d.replace(b,c);
+			}
+			return d;
+		},
+		showtitle:function(docpath){
+			var json = { "docxTitle": docpath };
+			this.initdocxList();
+			$.ajax({
+				type: "post",
+				dataType: "json",
+				contentType: "application/json;charset=utf-8",
+				//url:  "api",
+				url: "api",
+				data: JSON.stringify(json),
+				async: false,
+				success: function (data) {
+					$(textarea1).val(tiku.replaceAll(data.title,"####","\r\n"));
+					$(textarea2).val(tiku.replaceAll(data.answer,"####","\r\n"));
+				},
+				error: function (data) {
+					console.log(data);
+				}
+			});	
+		},		
 		aaa: function () {
 			$.ajax({
 				/*
