@@ -105,12 +105,12 @@ public class SwingUI {
                 Double heightDouble = new Integer(HEIGHT).doubleValue();
 
                 VBox box = new VBox(10);
-                HBox urlBox = new HBox(10);
+                //HBox urlBox = new HBox(10);
                 final TextField urlTextField = new TextField();
                 urlTextField.setText(url);
-                Button go = new Button("go");
+                //Button go = new Button("go");
                 urlTextField.setPrefWidth(WIDTH - 80);
-                urlBox.getChildren().addAll(urlTextField, go);
+               // urlBox.getChildren().addAll(urlTextField, go);
 
                 WebView view = new WebView();
                 view.setMinSize(widthDouble, heightDouble);
@@ -119,12 +119,13 @@ public class SwingUI {
                 eng.load(url);
                 root.getChildren().add(view);
 
-                urlBox.setVisible(false);
+              //  urlBox.setVisible(false);
                 
-                box.getChildren().add(urlBox);
+                //box.getChildren().add(urlBox);
                 box.getChildren().add(view);
                 root.getChildren().add(box);
 
+                /*
                 go.setOnAction(new EventHandler<ActionEvent>() {
                     @Override
                     public void handle(ActionEvent event) {
@@ -135,6 +136,7 @@ public class SwingUI {
                         }
                     }
                 });
+                */
             }
         });
 
