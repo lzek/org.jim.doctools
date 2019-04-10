@@ -132,6 +132,30 @@ public class ServicesHandler extends HttpServlet {
 					docFile.delFolder("./status/used");
 					responseOutWithJson(response, "{\"info\":\"已执行清除\"}", true);
 					break;
+				case "docxList":
+					String docxtype = (String)(json.get(key));
+					String docxList="";
+					switch (docxtype) {
+					case "全部":
+					case "单选":
+						docxList="{ "+getSingleDocxListServices("单选",(docxtype.contentEquals("单选")||docxtype.contentEquals("全部")));
+					case "多选":
+						docxList=docxList+", "+getSingleDocxListServices("多选",(docxtype.contentEquals("多选")||docxtype.contentEquals("全部")));
+					case "不定项":
+						docxList=docxList+", "+getSingleDocxListServices("不定项",(docxtype.contentEquals("不定项")||docxtype.contentEquals("全部")));
+					case "判断":
+						docxList=docxList+", "+getSingleDocxListServices("判断",(docxtype.contentEquals("判断")||docxtype.contentEquals("全部")));
+					case "填空":
+						docxList=docxList+", "+getSingleDocxListServices("填空",(docxtype.contentEquals("填空")||docxtype.contentEquals("全部")));
+					case "简答":
+						docxList=docxList+", "+getSingleDocxListServices("简答",(docxtype.contentEquals("简答")||docxtype.contentEquals("全部")));
+					case "未知":
+						docxList=docxList+", "+getSingleDocxListServices("未知",(docxtype.contentEquals("未知")||docxtype.contentEquals("全部"))) +"}";
+					default:
+				}
+					
+					responseOutWithJson(response, docxList, true);
+					break;
 				default:
 					responseOutWithJson(response, "{\"info\":\"null\"}", true);
 				}
@@ -141,6 +165,23 @@ public class ServicesHandler extends HttpServlet {
 		}
 	}
 
+	private String getSingleDocxListServices(String type,Boolean canAccess) {
+		ArrayList<String> a =new ArrayList<String>();
+				if (canAccess ) {
+					a=docFile.getAllFileList("试题库/"+type, "_answer");
+				}
+		String c="";
+		for(String b:a) {
+			if (c.equals("")) {
+				c="\""+b+"\"";
+			}else {
+				c=c+",\""+b+"\"";
+			}
+		}
+		c="\""+type+"\":["+c+"]";
+		return c;
+	}
+	
 	public JSONObject receivePost(HttpServletRequest request) throws UnsupportedEncodingException, IOException {
 		// 读取请求内容
 		BufferedReader br = new BufferedReader(new InputStreamReader(request.getInputStream(), "utf-8"));

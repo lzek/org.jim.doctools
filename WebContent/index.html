@@ -208,12 +208,19 @@
               </select>
             </div>
           </div>
+          <div class="col-md-12 	col-lg-12">
+            <ul>
+              <li class="col-md-1 	col-lg-1" v-for="item in docxListCount">
+                 {{ item.code }} : {{ item.value }}
+              </li>
+            </ul>
+          </div>
           <div id="guanliControl_item" class="col-md-12 	col-lg-12">
             <button type="button" class="btn btn-info ">上一条</button>
             <button type="button" class="btn btn-info ">下一条</button>
             <button type="button" class="btn btn-primary ">新增</button>
             <button type="button" class="btn btn-success ">保存</button>
-            <button type="button" class="btn btn-danger ">删除</button>             
+            <button type="button" class="btn btn-danger ">删除</button>
             <button type="button" class="btn btn-warning ">归类</button>
           </div>
         </div>

@@ -45,14 +45,19 @@ var tiku = new Vue({
 		list: [{ code: "templateA3.docx", name: 'A3' }, { code: "templateA4.docx", name: 'A4' }],
 		avoidusedcontrol: [{ code: "true", name: '是' }, { code: "false", name: '否' }],
 
-		guanliControl:"",
-		guanliControlList:["全部","单选","多选","填空","判断","简答","不定项"],
+		guanliControl: "全部",
+		guanliControlList: ["全部", "单选", "多选", "填空", "判断", "简答", "不定项", "未知"],
 
-		guanliContent:"",
-		guanliContentList:["全部问题","只显示无答案问题","只显示含答案问题","显示未分类问题"]
+		guanliContent: "全部",
+		guanliContentList: ["全部", "只显示无答案问题", "显示未分类问题", "只显示含答案问题"],
+
+		docxList: {},
+		docxListCount:[{code:"单选",value:0},{code:"多选",value:0},{code:"填空",value:0},{code:"判断",value:0},{code:"简答",value:0},{code:"不定项",value:0},{code:"未知",value:0}]
+
 
 	},
 	methods: {
+
 		shownav: function () {
 			this.navshow = !this.navshow;
 			if (!this.navshow) {
@@ -163,6 +168,11 @@ var tiku = new Vue({
 		FNav: function (type) {
 			this.FInitProperties();
 			this.setVisabled(type);
+			switch (type) {
+				case "Vguanli":
+					this.getDocxList(this.guanliContent);
+					break;
+			}
 		},
 		FgetTemplateList: function () {
 			var json = { "properties": {} };
@@ -468,15 +478,96 @@ var tiku = new Vue({
 				}
 			});
 		},
+		initdocxList:function(){
+			if (typeof(this.docxList.单选) == "undefined"){
+				this.docxList.单选={}
+			}
+			if (typeof(this.docxList.多选) == "undefined"){
+				this.docxList.多选={}
+			}
+			if (typeof(this.docxList.不定项) == "undefined"){
+				this.docxList.不定项={}
+			}
+			if (typeof(this.docxList.判断) == "undefined"){
+				this.docxList.判断={}
+			}
+			if (typeof(this.docxList.填空) == "undefined"){
+				this.docxList.填空={}
+			}
+			if (typeof(this.docxList.简答) == "undefined"){
+				this.docxList.简答={}
+			}
+			if (typeof(this.docxList.未知) == "undefined"){
+				this.docxList.未知={}
+			}
+		},
+		getDocxList: function (type) {
+			var json = { "docxList": type };
+			this.initdocxList();
+			$.ajax({
+				type: "post",
+				dataType: "json",
+				contentType: "application/json;charset=utf-8",
+				//url:  "api",
+				url: "api",
+				data: JSON.stringify(json),
+				async: false,
+				success: function (data) {
+					switch (type) {
+						case "全部":
+							tiku.$data.docxList.单选 = data.单选;
+							tiku.$data.docxList.多选 = data.多选;
+							tiku.$data.docxList.不定项 = data.不定项;
+							tiku.$data.docxList.判断 = data.判断;
+							tiku.$data.docxList.填空 = data.填空;
+							tiku.$data.docxList.简答 = data.简答;
+							tiku.$data.docxList.未知 = data.未知;
+							break;
+						case "单选":
+							tiku.$data.docxList.单选 = data.单选;
+							break;
+						case "多选":
+							tiku.$data.docxList.多选 = data.多选;
+							break;
+						case "不定项":
+							tiku.$data.docxList.不定项 = data.不定项;
+							break;
+						case "判断":
+							tiku.$data.docxList.判断 = data.判断;
+							break;
+						case "填空":
+							tiku.$data.docxList.填空 = data.填空;
+							break;
+						case "简答":
+							tiku.$data.docxList.简答 = data.简答;
+							break;
+						case "未知":
+							tiku.$data.docxList.未知 = data.未知;
+							break;
+						default:
+					}
+				},
+				error: function (data) {
+					console.log(data);
+				}
+			});
+			this.docxListCount=[{code:"单选",value:this.docxList.单选.length},
+			{code:"多选",value:this.docxList.多选.length},
+			{code:"填空",value:this.docxList.填空.length},
+			{code:"判断",value:this.docxList.判断.length},
+			{code:"简答",value:this.docxList.简答.length},
+			{code:"不定项",value:this.docxList.不定项.length},
+			{code:"未知",value:this.docxList.未知.length}]
+		},
 		aaa: function () {
 			$.ajax({
-			  /*
-				  type: 请求的类型
-				  dataType: 从服务端接收的数据类型 html, xml, text, json
-				  url: 请求路径
-				  data: 请求参数
-				  success: 回调函数 msg: 从服务端接收过来的内容
-			   */
+				/*
+					type: 请求的类型
+					dataType: 从服务端接收的数据类型 html, xml, text, json
+					url: 请求路径
+					data: 请求参数
+					success: 回调函数 msg: 从服务端接收过来的内容
+				 */
 				type: "post",
 				dataType: "json",
 				url: "api",
@@ -495,18 +586,18 @@ var tiku = new Vue({
 	}
 });
 
-var setbackgroup=function(){
-	var div_h=$(window).height()-50;
+var setbackgroup = function () {
+	var div_h = $(window).height() - 50;
 	$("#chouti").height(div_h);
 	$("#quchong").height(div_h);
 	$("#createPapers").height(div_h);
 	$("#guanli").height(div_h);
 	$("#classify").height(div_h);
 	$("#peizhi").height(div_h);
-	if (tiku.$data.docProperties.backgroupImage!=""){
-		$("body").css("background","url(./themes/backgroup/"+tiku.$data.docProperties.backgroupImage+")").css("background-repeat","no-repeat").css("background-size","100% 100%");
+	if (tiku.$data.docProperties.backgroupImage != "") {
+		$("body").css("background", "url(./themes/backgroup/" + tiku.$data.docProperties.backgroupImage + ")").css("background-repeat", "no-repeat").css("background-size", "100% 100%");
 	}
-	
+
 };
 
 (function () {
@@ -515,7 +606,7 @@ var setbackgroup=function(){
 	tiku.FgetTemplateList();
 	tiku.setVisabled("Vchouti");
 	tiku.$data.showchoutifilename = "抓取试卷池指定试卷：";
-	$("#loadingModal").modal('hide'); 
+	$("#loadingModal").modal('hide');
 	setbackgroup();
 }
 )()
@@ -528,6 +619,6 @@ div.background{
 	background-image:url(timg.jpg);
 	background-repeat:no-repeat;
 	background-size:100% 100%;
-	
+
 }
 */
