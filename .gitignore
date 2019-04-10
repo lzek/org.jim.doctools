@@ -63,3 +63,7 @@ $RECYCLE.BIN/
 *.lnk
 /target/
 /grabSource.log
+/试题库/
+/试卷池/
+/jre/
+/status/

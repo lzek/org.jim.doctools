@@ -19,7 +19,7 @@ public class MergerFolder {
 	 * @throws Exception
 	 */
 	public static int run(String AFolder,String BFolder,float Percent) throws Exception {
-		
+		int result=0;
 		if (new File(AFolder).exists()) {
 			ArrayList<String> AList=docFile.getAllFileList(AFolder, "_answer");
 			ArrayList<String> BList=docFile.getAllFileList(BFolder, "_answer");
@@ -78,7 +78,6 @@ public class MergerFolder {
 				}
 			}	
 			FlatFile.saveProperties(record,"status/Repetition/"+BFolder+".log");
-			int result=0;
 			for(String m:removeList) {
 				File f=new File(m);
 				if (f.exists()) {
