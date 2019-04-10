@@ -67,10 +67,8 @@ public class docFile {
         		String np=newPath+ file.separator +p;
         		File tf=new File(tp);
         		if (tf.isDirectory()) {
-        			System.out.print("\r\n["+np+"]");
         			copyDir(tp,np);
         		}else {
-        			System.out.print("\r\n......"+np);
         			copyFile(tp,np);
         		}
         	}

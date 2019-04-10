@@ -8,7 +8,7 @@ import org.jim.doctools.util.JPoi;
 import org.jim.doctools.util.docFile;
 
 public class DocRepetitionRate {
-	private static Logger log = LogManager.getLogger(docFile.class);
+	private static Logger log = LogManager.getLogger(DocRepetitionRate.class);
 	public float RepetitionPercentByLine(String A,String B) throws Exception {
 		JPoi jpoi=new JPoi();
 		ArrayList<String> AContents=jpoi.getContextRows(A);

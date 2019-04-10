@@ -1,169 +1,209 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="css/lib/bootstrap.min.css">
-    <link rel="stylesheet" href="css/lib/bootstrap-theme.min.css">
-    <link rel="stylesheet" href="css/my.css">
-    <link href="css/fileinput.css" media="all" rel="stylesheet" type="text/css"/>
+  <link rel="stylesheet" href="css/lib/bootstrap.min.css">
+  <link rel="stylesheet" href="css/lib/bootstrap-theme.min.css">
+  <link rel="stylesheet" href="css/my.css">
+  <link href="css/fileinput.css" media="all" rel="stylesheet" type="text/css" />
 
-    <script src="js/lib/jquery.min.js"></script>
-    <script src="js/lib/bootstrap.min.js"></script>    
+  <script src="js/lib/jquery.min.js"></script>
+  <script src="js/lib/bootstrap.min.js"></script>
 
-    <script src="js/fileinput.js" type="text/javascript"></script>
+  <script src="js/fileinput.js" type="text/javascript"></script>
 
-    <script src="js/lib/vue.js"></script>
-    <title>试题管理</title>
+  <script src="js/lib/vue.js"></script>
+  <title>试题管理</title>
 </head>
+
 <body>
   <div id="vueEntry">
-	  <div class="modal fade" id="loadingModal">
-		<div style="width: 200px;height:20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%;margin-left:-100px;margin-top:-10px">
-			<div class="progress progress-striped active" style="margin-bottom: 0;">
-				<div class="progress-bar" style="width: 100%;"></div>
-			</div>
-			<h5>正在加载...</h5>
-		</div>
-	</div>
-	
-      <div><a  v-on:click="shownav">{{ navAppend }}</a></div>
-    
-     <!-- //导航-->
-    <div  class="sidebar col-sm-2 	col-md-2 	col-lg-2"  v-show="navshow">
-      <ul class="nav nav-sidebar">          
+    <div class="modal fade" id="loadingModal">
+      <div
+        style="width: 200px;height:20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%;margin-left:-100px;margin-top:-10px">
+        <div class="progress progress-striped active" style="margin-bottom: 0;">
+          <div class="progress-bar" style="width: 100%;"></div>
+        </div>
+        <h5>正在加载...</h5>
+      </div>
+    </div>
+
+    <div id="nav">
+      <div><a v-on:click="shownav">{{ navAppend }}</a></div>
+
+      <!-- //导航-->
+      <div id="nav2" class="sidebar col-sm-2 	col-md-2 	col-lg-2" v-show="navshow">
+        <ul class="nav nav-sidebar">
           <li><a id="Vchouti" class="leftNav" v-on:click='FNav("Vchouti")'>{{ chouti }}</a></li>
           <li><a id="VcreatePapers" class="leftNav" v-on:click='FNav("VcreatePapers")'>{{ createPapers }}</a></li>
           <li><a id="Vquchong" class="leftNav" v-on:click='FNav("Vquchong")'>{{ quchong }}</a></li>
-          <li><a id="Vpeizhi" class="leftNav" v-on:click='FNav("Vpeizhi")'>{{ peizhi }}</a></li>
-          <!--<li><a id="Vtikuguanl" class="leftNav" v-on:click='FNav("Vtikuguanl")'>{{ tikuguanl }}</a></li>-->
+          <li><a id="Vguanli" class="leftNav" v-on:click='FNav("Vguanli")'>{{ guanli }}</a></li>
           <!--<li><a id="Vclassify" class="leftNav" v-on:click='FNav("Vclassify")'>{{ classify }}</a></li>-->
+          <li><a id="Vpeizhi" class="leftNav" v-on:click='FNav("Vpeizhi")'>{{ peizhi }}</a></li>
         </ul>
+      </div>
     </div>
 
     <!--主界面-->
     <div id="main" class="col-sm-10 	col-md-10 	col-lg-10">
-      <div  class="" v-show="Vchouti"> 
+      <div id="chouti" class="col-md-12 	col-lg-12" v-show="Vchouti">
         <div class="text"></div>
-			<div class="text"><ul>
-                <li v-for="(value, key, index) in databaseProperties">
-                    {{ key }} : {{ value }}
-                </li>
-            </ul>
-          </div>
-		<div>修改：</div>
-		  <div class="col-md-12 	col-lg-12">
-              <div class="col-md-6 	col-lg-6" >缓存文件夹：<input type="text" v-model="p_tempdatabase" v-on:change='changeItem("p_tempdatabase")'/></div>
-			  <div class="col-md-6 	col-lg-6" >试题文件夹：<input type="text" v-model="p_database" v-on:change='changeItem("p_database")'/></div>
-          </div>
-		<div class="col-md-12 	col-lg-12">		  
-			<div class="btn btn-default col-md-4 	col-lg-4" @click="choutifunc()">{{  showchoutifilename }}</div> 
-			<div class="btn btn-default col-md-4 col-md-offset-2	col-lg-4 col-lg-offset-2" @click="choutifuncBatch()">批量从试题池抓题</div> 
-		</div>		
-        <div class="col-md-12 	col-lg-12"><input id="input-b1" name="input-b1" type="file" data-browse-on-zone-click="true" v-on:change="changefilename()"></div>
-        <div class="text col-md-12 	col-lg-12">{{  choutiresult }}</div>        
+        <div class="text">
+          <ul>
+            <li v-for="(value, key, index) in databaseProperties">
+              {{ key }} : {{ value }}
+            </li>
+          </ul>
+        </div>
+        <div>修改：</div>
+        <div class="col-md-12 	col-lg-12">
+          <div class="col-md-6 	col-lg-6">缓存文件夹：<input type="text" v-model="p_tempdatabase"
+              v-on:change='changeItem("p_tempdatabase")' /></div>
+          <div class="col-md-6 	col-lg-6">试题文件夹：<input type="text" v-model="p_database"
+              v-on:change='changeItem("p_database")' /></div>
+        </div>
+        <div class="col-md-12 	col-lg-12">
+          <div class="btn btn-default col-md-4 	col-lg-4" @click="choutifunc()">{{  showchoutifilename }}</div>
+          <div class="btn btn-default col-md-4 col-md-offset-2	col-lg-4 col-lg-offset-2" @click="choutifuncBatch()">
+            批量从试题池抓题</div>
+        </div>
+        <div class="col-md-12 	col-lg-12"><input id="input-b1" name="input-b1" type="file"
+            data-browse-on-zone-click="true" v-on:change="changefilename()"></div>
+        <div class="text col-md-12 	col-lg-12">{{  choutiresult }}</div>
       </div>
 
-      <div  class="col-md-12 	col-lg-12"  v-show="Vquchong">
-		<div class="col-md-12 	col-lg-12">内容重复率大于等于 {{ p_merge_per }} % 视为重复题目，自动从题库中对比删除</div>
-		<div>修改：</div>
-		  <div class="col-md-12 	col-lg-12">（填写百分比数）
-              <div class="col-md-6 	col-lg-6" >内容重复率阈值：<input type="text" v-model="p_merge_per" v-on:change='changeItem("p_merge_per")'/>%</div>
-          </div>
-        <div class="btn btn-default"  @click="quchongfunc()">去除重复试题（依据题库的数量多少，可能较为耗时，请耐心等候）</div>
-        <!--<div class="col-md-6 	col-lg-6 aaa"><textarea id="textarea1" class="form-control" rows="20"></textarea></div>
-        <div class="col-md-6 	col-lg-6 bbb"><textarea id="textarea2"  class="form-control" rows="20"></textarea></div>
-        <div class="col-md-2 col-md-offset-10"><button @click="aaa()">test</button><button @click="bbb()">bbb</button></div>-->  
-		<div class="col-md-12 	col-lg-12">{{ quchongresult }}</div>		
+      <div id="quchong" class="col-md-12 	col-lg-12" v-show="Vquchong">
+        <div class="col-md-12 	col-lg-12">内容重复率大于等于 {{ p_merge_per }} % 视为重复题目，自动从题库中对比删除</div>
+        <div>修改：</div>
+        <div class="col-md-12 	col-lg-12">（填写百分比数）
+          <div class="col-md-6 	col-lg-6">内容重复率阈值：<input type="text" v-model="p_merge_per"
+              v-on:change='changeItem("p_merge_per")' />%</div>
+        </div>
+        <div class="btn btn-default" @click="quchongfunc()">去除重复试题（依据题库的数量多少，可能较为耗时，请耐心等候）</div>
+
+        <div class="col-md-12 	col-lg-12">{{ quchongresult }}</div>
       </div>
 
-      <div  class="" v-show="VcreatePapers">
-          <div class="text col-md-12 col-lg-12"></div>        
-          <div class="btn btn-default" @click="createpaperfunc()">生成试卷</div>          
-          <div class="text"><ul>
-                <li v-for="(value, key, index) in showProperties">
-                    {{ key }} : {{ value }}
-                </li>
-            </ul>
+      <div id="createPapers" class="col-md-12 	col-lg-12" v-show="VcreatePapers">
+        <div class="text col-md-12 col-lg-12"></div>
+        <div class="btn btn-default" @click="createpaperfunc()">生成试卷</div>
+        <div class="text">
+          <ul>
+            <li v-for="(value, key, index) in showProperties">
+              {{ key }} : {{ value }}
+            </li>
+          </ul>
+        </div>
+        <div class="col-md-12 	col-lg-12">
+          <div class="col-md-3 	col-lg-3">已用过题目，不再用于出题:<select v-model="p_avoidused"
+              v-on:change='changeItem("p_avoidused")'>
+              <option v-for="item in avoidusedcontrol" v-bind:value="item.code">{{ item.name }}</option>
+            </select>
           </div>
-		  <div class="col-md-12 	col-lg-12">			
-			<div class="col-md-3 	col-lg-3" >已用过题目，不再用于出题:<select v-model="p_avoidused" v-on:change='changeItem("p_avoidused")'>
-                  <option v-for="item in avoidusedcontrol" v-bind:value="item.code">{{ item.name }}</option>
-                </select>
-			</div>	
-			<div class="btn btn-default col-md-2 col-lg-2" @click='clearUsedFlag()'>清除题目已用标识</div>
-			<div class="col-md-7 col-lg-7"></div>
-		  </div >
-          <div>修改：</div>
-		  <div class="col-md-12 	col-lg-12">
-              <div class="col-md-2 	col-lg-2" >学校：<input type="text" v-model="p_school" v-on:change='changeItem("p_school")'/></div>
-			  <div class="col-md-2 	col-lg-2" >学期：<input type="text" v-model="p_semester" v-on:change='changeItem("p_semester")'/></div>
-			  <div class="col-md-2 	col-lg-2" >学科：<input type="text" v-model="p_subject" v-on:change='changeItem("p_subject")'/></div>
-			  <div class="col-md-2 	col-lg-2" >班级：<input type="text" v-model="p_class" v-on:change='changeItem("p_class")'/></div>
-			  <div class="col-md-2 	col-lg-2" >考试时间：<input type="text" v-model="p_time" v-on:change='changeItem("p_time")'/></div>
+          <div class="btn btn-default col-md-2 col-lg-2" @click='clearUsedFlag()'>清除题目已用标识</div>
+          <div class="col-md-7 col-lg-7"></div>
+        </div>
+        <div>修改：</div>
+        <div class="col-md-12 	col-lg-12">
+          <div class="col-md-2 	col-lg-2">学校：<input type="text" v-model="p_school"
+              v-on:change='changeItem("p_school")' /></div>
+          <div class="col-md-2 	col-lg-2">学期：<input type="text" v-model="p_semester"
+              v-on:change='changeItem("p_semester")' /></div>
+          <div class="col-md-2 	col-lg-2">学科：<input type="text" v-model="p_subject"
+              v-on:change='changeItem("p_subject")' /></div>
+          <div class="col-md-2 	col-lg-2">班级：<input type="text" v-model="p_class" v-on:change='changeItem("p_class")' />
           </div>
-		  <div class="col-md-12 	col-lg-12">
-              纸张大小：<select v-model="p_template" v-on:change='changeItem("p_template")'>
-                  <option v-for="item in list" v-bind:value="item.code">{{ item.name }}</option>
-                </select>
-			  保存文件名：<input type="text" v-model="p_file_prefix" v-on:change='changeItem("p_file_prefix")'/>
-			  分卷数量：<input type="text" v-model="p_diffcopies" v-on:change='changeItem("p_diffcopies")'/>
-			  
-          </div >
-		  
-		  <div class="col-md-12 col-lg-12">以下填写阿拉伯数字</div>
-          <div class="col-md-12 	col-lg-12">
-              <div class="col-md-2 	col-lg-2" >单选总分：<input type="text" v-model="p_单选_total" v-on:change='changeItem("p_单选_total")'/></div>
-			  <div class="col-md-2 	col-lg-2" >多选总分：<input type="text" v-model="p_多选_total" v-on:change='changeItem("p_多选_total")'/></div>
-			  <div class="col-md-2 	col-lg-2" >填空总分：<input type="text" v-model="p_填空_total" v-on:change='changeItem("p_填空_total")'/></div>
-			  <div class="col-md-2 	col-lg-2" >判断总分：<input type="text" v-model="p_判断_total" v-on:change='changeItem("p_判断_total")'/></div>
-			  <div class="col-md-2 	col-lg-2" >简答总分：<input type="text" v-model="p_简答_total" v-on:change='changeItem("p_简答_total")'/></div>
-			  <div class="col-md-2 	col-lg-2" >不定项总分：<input type="text" v-model="p_不定项_total" v-on:change='changeItem("p_不定项_total")'/></div>
-          </div>		  
-		  <div class="col-md-12 	col-lg-12">
-              <div class="col-md-2 	col-lg-2" >单选数量：<input type="text" v-model="p_单选_random" v-on:change='changeItem("p_单选_random")'/></div>
-			  <div class="col-md-2 	col-lg-2" >多选数量：<input type="text" v-model="p_多选_random" v-on:change='changeItem("p_多选_random")'/></div>
-			  <div class="col-md-2 	col-lg-2" >填空数量：<input type="text" v-model="p_填空_random" v-on:change='changeItem("p_填空_random")'/></div>
-			  <div class="col-md-2 	col-lg-2" >判断数量：<input type="text" v-model="p_判断_random" v-on:change='changeItem("p_判断_random")'/></div>
-			  <div class="col-md-2 	col-lg-2" >简答数量：<input type="text" v-model="p_简答_random" v-on:change='changeItem("p_简答_random")'/></div>
-			  <div class="col-md-2 	col-lg-2" >不定项数量：<input type="text" v-model="p_不定项_random" v-on:change='changeItem("p_不定项_random")'/></div>
+          <div class="col-md-2 	col-lg-2">考试时间：<input type="text" v-model="p_time" v-on:change='changeItem("p_time")' />
           </div>
-		  <div class="col-md-12 col-lg-12">序号负数表示不出题</div>
-		  <div class="col-md-12 	col-lg-12">
-              <div class="col-md-2 	col-lg-2" >单选序号：<input type="text" v-model="p_单选_order" v-on:change='changeItem("p_单选_order")'/></div>
-			  <div class="col-md-2 	col-lg-2" >多选序号：<input type="text" v-model="p_多选_order" v-on:change='changeItem("p_多选_order")'/></div>
-			  <div class="col-md-2 	col-lg-2" >填空序号：<input type="text" v-model="p_填空_order" v-on:change='changeItem("p_填空_order")'/></div>
-			  <div class="col-md-2 	col-lg-2" >判断序号：<input type="text" v-model="p_判断_order" v-on:change='changeItem("p_判断_order")'/></div>
-			  <div class="col-md-2 	col-lg-2" >简答序号：<input type="text" v-model="p_简答_order" v-on:change='changeItem("p_简答_order")'/></div>
-			  <div class="col-md-2 	col-lg-2" >不定项序号：<input type="text" v-model="p_不定项_order" v-on:change='changeItem("p_不定项_order")'/></div>
-          </div>
-		  <div class="col-md-12 	col-lg-12">
-			<button class="btn btn-default col-md-4 col-lg-4" @click="saveDocProperties()">保存到系统配置</button>
-		  </div>
-		   <div class="text col-md-12 col-lg-12">.{{  createpaperresult }}</div> 
+        </div>
+        <div class="col-md-12 	col-lg-12">
+          纸张大小：<select v-model="p_template" v-on:change='changeItem("p_template")'>
+            <option v-for="item in list" v-bind:value="item.code">{{ item.name }}</option>
+          </select>
+          保存文件名：<input type="text" v-model="p_file_prefix" v-on:change='changeItem("p_file_prefix")' />
+          分卷数量：<input type="text" v-model="p_diffcopies" v-on:change='changeItem("p_diffcopies")' />
+
+        </div>
+
+        <div class="col-md-12 col-lg-12">以下填写阿拉伯数字</div>
+        <div class="col-md-12 	col-lg-12">
+          <div class="col-md-2 	col-lg-2">单选总分：<input type="text" v-model="p_单选_total"
+              v-on:change='changeItem("p_单选_total")' /></div>
+          <div class="col-md-2 	col-lg-2">多选总分：<input type="text" v-model="p_多选_total"
+              v-on:change='changeItem("p_多选_total")' /></div>
+          <div class="col-md-2 	col-lg-2">填空总分：<input type="text" v-model="p_填空_total"
+              v-on:change='changeItem("p_填空_total")' /></div>
+          <div class="col-md-2 	col-lg-2">判断总分：<input type="text" v-model="p_判断_total"
+              v-on:change='changeItem("p_判断_total")' /></div>
+          <div class="col-md-2 	col-lg-2">简答总分：<input type="text" v-model="p_简答_total"
+              v-on:change='changeItem("p_简答_total")' /></div>
+          <div class="col-md-2 	col-lg-2">不定项总分：<input type="text" v-model="p_不定项_total"
+              v-on:change='changeItem("p_不定项_total")' /></div>
+        </div>
+        <div class="col-md-12 	col-lg-12">
+          <div class="col-md-2 	col-lg-2">单选数量：<input type="text" v-model="p_单选_random"
+              v-on:change='changeItem("p_单选_random")' /></div>
+          <div class="col-md-2 	col-lg-2">多选数量：<input type="text" v-model="p_多选_random"
+              v-on:change='changeItem("p_多选_random")' /></div>
+          <div class="col-md-2 	col-lg-2">填空数量：<input type="text" v-model="p_填空_random"
+              v-on:change='changeItem("p_填空_random")' /></div>
+          <div class="col-md-2 	col-lg-2">判断数量：<input type="text" v-model="p_判断_random"
+              v-on:change='changeItem("p_判断_random")' /></div>
+          <div class="col-md-2 	col-lg-2">简答数量：<input type="text" v-model="p_简答_random"
+              v-on:change='changeItem("p_简答_random")' /></div>
+          <div class="col-md-2 	col-lg-2">不定项数量：<input type="text" v-model="p_不定项_random"
+              v-on:change='changeItem("p_不定项_random")' /></div>
+        </div>
+        <div class="col-md-12 col-lg-12">序号负数表示不出题</div>
+        <div class="col-md-12 	col-lg-12">
+          <div class="col-md-2 	col-lg-2">单选序号：<input type="text" v-model="p_单选_order"
+              v-on:change='changeItem("p_单选_order")' /></div>
+          <div class="col-md-2 	col-lg-2">多选序号：<input type="text" v-model="p_多选_order"
+              v-on:change='changeItem("p_多选_order")' /></div>
+          <div class="col-md-2 	col-lg-2">填空序号：<input type="text" v-model="p_填空_order"
+              v-on:change='changeItem("p_填空_order")' /></div>
+          <div class="col-md-2 	col-lg-2">判断序号：<input type="text" v-model="p_判断_order"
+              v-on:change='changeItem("p_判断_order")' /></div>
+          <div class="col-md-2 	col-lg-2">简答序号：<input type="text" v-model="p_简答_order"
+              v-on:change='changeItem("p_简答_order")' /></div>
+          <div class="col-md-2 	col-lg-2">不定项序号：<input type="text" v-model="p_不定项_order"
+              v-on:change='changeItem("p_不定项_order")' /></div>
+        </div>
+        <div class="col-md-12 	col-lg-12">
+          <button class="btn btn-default col-md-4 col-lg-4" @click="saveDocProperties()">保存到系统配置</button>
+        </div>
+        <div class="text col-md-12 col-lg-12">.{{  createpaperresult }}</div>
       </div>
-      <div  class=""  v-show="Vpeizhi">
-          <div class="text"></div>
-          <div class="text"><ul>
-                <li v-for="(value, key, index) in docProperties">
-                    {{ index }}. {{ key }} : {{ value }}
-                </li>
-            </ul>
-          </div>
-          
-      </div>
-      
-      <div  class="" v-show="Vtikuguanl">
-          <div class="text"></div>
+      <div id="peizhi" class="col-md-12 	col-lg-12" v-show="Vpeizhi">
+        <div class="text"></div>
+        <div class="text">
+          <ul>
+            <li v-for="(value, key, index) in docProperties">
+              {{ index }}. {{ key }} : {{ value }}
+            </li>
+          </ul>
+        </div>
+
       </div>
 
-      <div  class="" v-show="Vclassify">
-          <div class="text"></div>
+      <div id="guanli" class="col-md-12 	col-lg-12" v-show="Vguanli">
+        <div class="col-md-6 	col-lg-6 aaa"><textarea id="textarea1" class="form-control" rows="20"></textarea></div>
+        <div class="col-md-6 	col-lg-6 bbb"><textarea id="textarea2" class="form-control" rows="20"></textarea></div>
+        <div class="col-md-2 col-md-offset-10"><button @click="aaa()">test</button><button @click="bbb()">bbb</button>
+        </div>
+        <div class="col-md-12 	col-lg-12">{{ quchongresult }}</div>
       </div>
-     
-  </div>
+
+      <div id="classify" class="col-md-12 	col-lg-12" v-show="Vclassify">
+        <div class="text"></div>
+      </div>
+
+    </div>
   </div>
 </body>
 <script src="js/myvue.js"></script>
+
 </html>

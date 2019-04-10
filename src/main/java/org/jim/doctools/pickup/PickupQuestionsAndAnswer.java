@@ -271,9 +271,10 @@ public class PickupQuestionsAndAnswer {
 	   
 	 //合并到databasePath
 	  // mergeTitleFolder(databasePath,tempdatabasePath);
-	   docFile.copyDir(tempdatabasePath, databasePath);
+	   
 	   File file=new File(tempdatabasePath);
 	   if ( file.exists() && !tempdatabasePath.contentEquals(databasePath)) {
+		   docFile.copyDir(tempdatabasePath, databasePath);
 		   docFile.delFolder(tempdatabasePath);
 		   file.delete();
 	   }

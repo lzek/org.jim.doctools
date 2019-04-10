@@ -101,11 +101,15 @@ public class FlatFile {
 	}
 	
 	public static void saveProperties(ArrayList<String> appProperties) throws IOException {
+		saveProperties(appProperties,"app.properties");
+	}
+	
+	public static void saveProperties(ArrayList<String> appProperties,String PropertiesName) throws IOException {
 		for(int i=0;i<appProperties.size();i++) {
 			if (i==0) {
-				FlatFile.write("app.properties", appProperties.get(i), false);
+				FlatFile.write(PropertiesName, appProperties.get(i), false);
 			} else {
-				FlatFile.write("app.properties", "\r\n"+appProperties.get(i));
+				FlatFile.write(PropertiesName, "\r\n"+appProperties.get(i));
 			}
 		}
 	}

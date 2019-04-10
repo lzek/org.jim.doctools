@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -33,7 +34,7 @@ import net.sf.json.JSONObject;
 
 @SuppressWarnings("serial")
 public class ServicesHandler  extends HttpServlet {
-	static Logger log = LogManager.getLogger(App.class);
+	static Logger log = LogManager.getLogger(ServicesHandler.class);
 	Bussiness BH=new Bussiness();
 	Conf cf=new Conf();
 	
@@ -92,7 +93,7 @@ public class ServicesHandler  extends HttpServlet {
             	  break;
               case "quchong":
             	  databasePath=BH.getProperties().get("database");
-            	  int rcount=mergeTitleFolder(databasePath,databasePath);
+            	  int rcount=mergeAllTitleFolder(databasePath,databasePath);
             	  responseOutWithJson(response,"{\"info\":\"已清理["+databasePath+"]下 "+rcount+" 道 重复题目\"}",true); 
             	  break;
               case "pickupBatch":
@@ -182,15 +183,27 @@ public class ServicesHandler  extends HttpServlet {
         }  
     } 
 
-	  private int mergeTitleFolder(String AFolder,String BFolder) throws Exception {
+    private int mergeFolder(String AFolder,String BFolder,String type) throws  Exception {
+    	String resultword="开始检测重复题目："+type;
+    	SimpleDateFormat f=new SimpleDateFormat("hh:mm");
+    	System.out.println(f.format(new Date())+resultword);
+    	log.info(resultword);
+    	int result=  MergerFolder.run(AFolder+"\\"+type, BFolder+"\\"+type, Float.parseFloat(BH.getProperties().get(type+"_merge_per")));
+    	resultword=BFolder+"'"+type+"' 类型共清理 "+result+" 道重复题目";
+    	log.info(resultword);
+    	System.out.println(resultword);
+    	return result;
+    }
+    
+	  private int mergeAllTitleFolder(String AFolder,String BFolder) throws Exception {
 		  int result=0;
-		  result=result+  MergerFolder.run(AFolder+"\\单选", BFolder+"\\单选", Float.parseFloat(BH.getProperties().get("单选_merge_per")));
-		  result=result+ MergerFolder.run(AFolder+"\\多选", BFolder+"\\多选",Float.parseFloat( BH.getProperties().get("多选_merge_per")));
-		  result=result+  MergerFolder.run(AFolder+"\\不定项", BFolder+"\\不定项", Float.parseFloat(BH.getProperties().get("不定项_merge_per")));
-		  result=result+  MergerFolder.run(AFolder+"\\判断", BFolder+"\\判断", Float.parseFloat(BH.getProperties().get("判断_merge_per")));
-		  result=result+  MergerFolder.run(AFolder+"\\简答", BFolder+"\\简答",Float.parseFloat( BH.getProperties().get("简答_merge_per")));
-		  result=result+  MergerFolder.run(AFolder+"\\填空", BFolder+"\\填空", Float.parseFloat(BH.getProperties().get("填空_merge_per")));
-		  result=result+  MergerFolder.run(AFolder+"\\未知", BFolder+"\\未知", Float.parseFloat(BH.getProperties().get("未知_merge_per")));
+		  result=result+  mergeFolder(AFolder,BFolder,"单选");
+		  result=result+ mergeFolder(AFolder,BFolder,"多选");
+		  result=result+  mergeFolder(AFolder,BFolder,"不定项");
+		  result=result+ mergeFolder(AFolder,BFolder,"判断"); 
+		  result=result+  mergeFolder(AFolder,BFolder,"简答");
+		  result=result+  mergeFolder(AFolder,BFolder,"填空");
+		  result=result+  mergeFolder(AFolder,BFolder,"未知");
 		  return result;
 	  }
 	
