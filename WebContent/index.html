@@ -190,8 +190,40 @@
       </div>
 
       <div id="guanli" class="col-md-12 	col-lg-12" v-show="Vguanli">
-        <div class="col-md-6 	col-lg-6 aaa"><textarea id="textarea1" class="form-control" rows="20"></textarea></div>
-        <div class="col-md-6 	col-lg-6 bbb"><textarea id="textarea2" class="form-control" rows="20"></textarea></div>
+        <div id="guanliExporter"></div>
+        <div id="guanliControl">
+          <div id="guanliControl_type">
+            <div class="col-md-3 	col-lg-3">操作题型:
+              <select v-model="guanliControl" v-on:change='changeItem("guanliControl")'>
+                <option v-for="item in guanliControlList" v-bind:value="item">
+                  {{ item }}
+                </option>
+              </select>
+            </div>
+            <div class="col-md-3 	col-lg-3">内容分类:
+              <select v-model="guanliContent" v-on:change='changeItem("guanliContent")'>
+                <option v-for="item in guanliContentList" v-bind:value="item">
+                  {{ item }}
+                </option>
+              </select>
+            </div>
+          </div>
+          <div id="guanliControl_item" class="col-md-12 	col-lg-12">
+            <button type="button" class="btn btn-info ">上一条</button>
+            <button type="button" class="btn btn-info ">下一条</button>
+            <button type="button" class="btn btn-primary ">新增</button>
+            <button type="button" class="btn btn-success ">保存</button>
+            <button type="button" class="btn btn-danger ">删除</button>             
+            <button type="button" class="btn btn-warning ">归类</button>
+          </div>
+        </div>
+        <div id="guanliView" class="col-md-12 	col-lg-12">
+          <div class="col-md-12 	col-lg-12">查看内容：</div>
+          <div id="title" class="col-md-6 	col-lg-6 aaa"><textarea id="textarea1" class="form-control"
+              rows="20"></textarea></div>
+          <div id="title_answer" class="col-md-6 	col-lg-6 bbb"><textarea id="textarea2" class="form-control"
+              rows="20"></textarea></div>
+        </div>
         <div class="col-md-2 col-md-offset-10"><button @click="aaa()">test</button><button @click="bbb()">bbb</button>
         </div>
         <div class="col-md-12 	col-lg-12">{{ quchongresult }}</div>

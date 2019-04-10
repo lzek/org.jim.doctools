@@ -43,7 +43,13 @@ var tiku = new Vue({
 		p_avoidused: '',
 
 		list: [{ code: "templateA3.docx", name: 'A3' }, { code: "templateA4.docx", name: 'A4' }],
-		avoidusedcontrol: [{ code: "true", name: '是' }, { code: "false", name: '否' }]
+		avoidusedcontrol: [{ code: "true", name: '是' }, { code: "false", name: '否' }],
+
+		guanliControl:"",
+		guanliControlList:["全部","单选","多选","填空","判断","简答","不定项"],
+
+		guanliContent:"",
+		guanliContentList:["全部问题","只显示无答案问题","只显示含答案问题","显示未分类问题"]
 
 	},
 	methods: {
