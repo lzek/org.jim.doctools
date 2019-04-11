@@ -83,6 +83,23 @@ public class Bussiness {
 		result = "{template:[" + result + "]}";
 		return result;
 	}
+	
+	// 获取模板
+		public String getBackgroundList() {
+			String[] tmp = docFile.getAllFileArray("./WebContent/themes/backgroup");
+			String result = "";
+			for (String x : tmp) {
+				if ( x.endsWith(".jpg")) {
+					if (result.contentEquals("")) {
+						result = "\"" + x+"\"" ;
+					} else {
+						result = result + "," +"\"" + x+"\"";
+					}
+				}
+			}
+			result = "{backgroundlist:[" + result + "]}";
+			return result;
+		}
 
 	private void upgradeConfFile() throws IOException {
 		FlatFile.upgradePropertiesFromStandard(docProperties);

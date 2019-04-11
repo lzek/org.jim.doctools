@@ -29,6 +29,7 @@ import org.jim.doctools.merge.MergerFolder;
 import org.jim.doctools.util.Conf;
 import org.jim.doctools.util.FlatFile;
 import org.jim.doctools.util.JPoi;
+import org.jim.doctools.util.XwpfWrite;
 import org.jim.doctools.util.docFile;
 
 import net.sf.json.JSONObject;
@@ -61,6 +62,8 @@ public class ServicesHandler extends HttpServlet {
 			break;
 		case "getTemplateName":
 			responseOutWithJson(response, BH.getTemplateName(), true);
+		case "getBackgroundList":
+			responseOutWithJson(response, BH.getBackgroundList(), true);
 			break;
 		}
 
@@ -138,24 +141,24 @@ public class ServicesHandler extends HttpServlet {
 					String docxtype = (String)(nitem.get("type"));
 					String docxAnswer = (String)(nitem.get("answer"));
 					String docxList="";
-					switch (docxtype) {
-					case "全部":
-					case "单选":
+					//switch (docxtype) {
+					//case "全部":
+					//case "单选":
 						docxList="{ "+getSingleDocxListToJSON("单选",docxAnswer,(docxtype.contentEquals("单选")||docxtype.contentEquals("全部")));
-					case "多选":
+					//case "多选":
 						docxList=docxList+", "+getSingleDocxListToJSON("多选",docxAnswer,(docxtype.contentEquals("多选")||docxtype.contentEquals("全部")));
-					case "不定项":
+					//case "不定项":
 						docxList=docxList+", "+getSingleDocxListToJSON("不定项",docxAnswer,(docxtype.contentEquals("不定项")||docxtype.contentEquals("全部")));
-					case "判断":
+					//case "判断":
 						docxList=docxList+", "+getSingleDocxListToJSON("判断",docxAnswer,(docxtype.contentEquals("判断")||docxtype.contentEquals("全部")));
-					case "填空":
+				//	case "填空":
 						docxList=docxList+", "+getSingleDocxListToJSON("填空",docxAnswer,(docxtype.contentEquals("填空")||docxtype.contentEquals("全部")));
-					case "简答":
+					//case "简答":
 						docxList=docxList+", "+getSingleDocxListToJSON("简答",docxAnswer,(docxtype.contentEquals("简答")||docxtype.contentEquals("全部")));
-					case "未知":
+					//case "未知":
 						docxList=docxList+", "+getSingleDocxListToJSON("未知",docxAnswer,(docxtype.contentEquals("未知")||docxtype.contentEquals("全部"))) +"}";
-					default:
-				}					
+					//default:
+				//}					
 					responseOutWithJson(response, docxList, true);
 					break;
 				case "docxTitle":					
@@ -182,6 +185,38 @@ public class ServicesHandler extends HttpServlet {
 					String jsonword="{\"title\":\""+titleword+"\",\"answer\":\""+answerword+"\"}";
 					responseOutWithJson(response,jsonword , true);
 					break;
+				case "move":
+					JSONObject mitem = (JSONObject) json.get(key);	
+					String mfilename = (String)(mitem.get("filename"));
+					String moveto = (String)(mitem.get("moveto"));
+					File mfile=new File(mfilename.replace(".docx", "_answer.docx"));
+					if (mfile.exists()) mfile.renameTo(new File(moveto.replace(".docx", "_answer.docx")));
+					mfile=new File(mfilename);
+					mfile.renameTo(new File(moveto));
+					responseOutWithJson(response, "{\"info\":\""+mfilename+"已经归类到"+moveto+"\"}",  true);
+					break;
+				case "save":
+					JSONObject sitem = (JSONObject) json.get(key);					
+					String sfilename = (String)(sitem.get("filename"));
+					String stitle = (String)(sitem.get("title"));
+					stitle=stitle.replaceAll("\\\\r", "\\r").replaceAll("\\\\n", "\\n");
+					String sanswer = (String)(sitem.get("answer"));
+					sanswer=sanswer.replaceAll("\\\\r", "\\r").replaceAll("\\\\n", "\\n");
+					File sfile=new File(sfilename);
+					XwpfWrite xw = new XwpfWrite();
+					xw.savaPickupQuestions(stitle, sfilename, false);
+					xw.savaPickupQuestions(sanswer, sfilename.replace(".docx", "_answer.docx"), false);
+					responseOutWithJson(response, "{\"info\":\""+sfilename+"已经保存\"}",  true);
+					break;
+				case "del":
+					JSONObject ditem = (JSONObject) json.get(key);					
+					String dfilename = (String)(ditem.get("filename"));
+					File file=new File(dfilename.replace(".docx", "_answer.docx"));
+					if (file.exists()) file.delete();
+					file=new File(dfilename);
+					if (file.exists()) file.delete();
+					responseOutWithJson(response, "{\"info\":\""+dfilename+"已经删除\"}",  true);
+					break;
 				default:
 					responseOutWithJson(response, "{\"info\":\"null\"}", true);
 				}
@@ -203,6 +238,7 @@ public class ServicesHandler extends HttpServlet {
 						singleTypeList=docFile.getAllFileList("试题库/"+type);
 						for(String docxname:singleTypeList) {
 							String newfullname="试题库/"+type+"/"+docxname;
+							String anwserDocxName=docxname.replace(".docx", "_answer.docx");
 							switch(docxAnswer) {							
 							//按答案区分
 							case "all":
@@ -211,13 +247,17 @@ public class ServicesHandler extends HttpServlet {
 								}
 								break;
 							case "OnlyWithoutAnswer":
-								if (!singleTypeList.contains(docxname.replace(".docx", "_answer.docx"))) {
-									newList.add(newfullname);
+								if (!docxname.contains("_answer")) {
+									if (!singleTypeList.contains(anwserDocxName)) {
+											newList.add(newfullname);							
+									}
 								}
 								break;
 							case "OnlyWithAnswer":
-								if (singleTypeList.contains(docxname.replace(".docx", "_answer.docx"))) {
-									newList.add(newfullname);
+								if (!docxname.contains("_answer")) {
+									if (singleTypeList.contains(anwserDocxName)) {
+										newList.add(newfullname);
+									}
 								}
 								break;
 							}

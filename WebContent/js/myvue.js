@@ -42,31 +42,42 @@ var tiku = new Vue({
 		p_单选_random: '', p_多选_random: '', p_不定项_random: '', p_填空_random: '', p_判断_random: '', p_简答_random: '',
 		p_avoidused: '',
 
-		list: [{ code: "templateA3.docx", name: 'A3' }, { code: "templateA4.docx", name: 'A4' }],
+		templatelist: [{ code: "templateA3.docx", name: 'A3' }, { code: "templateA4.docx", name: 'A4' }],
 		avoidusedcontrol: [{ code: "true", name: '是' }, { code: "false", name: '否' }],
 
 		guanliControl: "全部",
 		guanliControlList: ["全部", "单选", "多选", "填空", "判断", "简答", "不定项", "未知"],
 
 		guanliContent: "all",
-		guanliContentList: [{code:"all",name:"全部"}, {code:"OnlyWithoutAnswer",name:"只显示无答案问题"},  {code:"OnlyWithAnswer",name:"只显示含答案问题"}],
+		guanliContentList: [{ code: "all", name: "全部" }, { code: "OnlyWithoutAnswer", name: "只显示无答案问题" }, { code: "OnlyWithAnswer", name: "只显示含答案问题" }],
 
-		guanliDocxIndex:0,
-		guanliDocxMaxIndex:0,
-		guanliresult:"",
+		guanliDocxIndex: 0,
+		guanliDocxMaxIndex: 0,
+		guanliresult: "",
+		guanliMove: "单选",
+		guanliMoveList: ["单选", "多选", "填空", "判断", "简答", "不定项"],
+		guanliConform: "",
+		guanliConformList: ["是", "否"],
+
+		guanliAction: "",
+		guanliMsg: "",
+
+		guanliActionShow: "",
+		Vconform: false,
 
 		docxList: {},
-		docxListCount:[{code:"单选",value:0},
-		{code:"多选",value:0},
-		{code:"填空",value:0},
-		{code:"判断",value:0},
-		{code:"简答",value:0},
-		{code:"不定项",value:0},
-		{code:"未知",value:0}],
-		currentDocx:"",
-		currentDocxShow:""
+		docxListCount: [{ code: "单选", value: 0 },
+		{ code: "多选", value: 0 },
+		{ code: "填空", value: 0 },
+		{ code: "判断", value: 0 },
+		{ code: "简答", value: 0 },
+		{ code: "不定项", value: 0 },
+		{ code: "未知", value: 0 }],
+		currentDocx: "",
+		currentDocxShow: "",
 
-
+		p_background:"",
+		p_backgroundlist:[]
 	},
 	methods: {
 
@@ -176,11 +187,30 @@ var tiku = new Vue({
 
 			this.p_merge_per = this.docProperties.单选_merge_per
 
+			this.p_background = this.docProperties.backgroupImage
+
 		},
 		FNav: function (type) {
 			this.FInitProperties();
 			this.setVisabled(type);
 		},
+		FgetBackgroundList: function () {
+			var json = { "properties": {} };
+			$.ajax({
+				type: "get",
+				dataType: "json",
+				contentType: "application/json;charset=utf-8",
+				url: "api?command=getBackgroundList",
+				data: JSON.stringify(json),
+				async: false,
+				success: function (data) {
+					tiku.$data.p_backgroundlist = data.backgroundlist;
+				},
+				error: function (data) {
+					console.log(data);
+				}
+			});
+		},		
 		FgetTemplateList: function () {
 			var json = { "properties": {} };
 			$.ajax({
@@ -191,7 +221,7 @@ var tiku = new Vue({
 				data: JSON.stringify(json),
 				async: false,
 				success: function (data) {
-					tiku.$data.list = data.template;
+					tiku.$data.templatelist = data.template;
 				},
 				error: function (data) {
 					console.log(data);
@@ -421,6 +451,10 @@ var tiku = new Vue({
 					this.docProperties.未知_merge_per = this.p_merge_per
 					this.docProperties.多选_merge_per = this.p_merge_per
 					break;
+				case "p_background":
+					this.docProperties.backgroupImage=this.p_background
+					setbackgroup();
+					break;
 				default:
 					break;
 			}
@@ -485,106 +519,229 @@ var tiku = new Vue({
 				}
 			});
 		},
-		initdocxList:function(){
-			if (typeof(this.docxList.单选) == "undefined"){
-				this.docxList.单选={}
+		initdocxList: function () {
+			if (typeof (this.docxList.单选) == "undefined") {
+				this.docxList.单选 = {}
 			}
-			if (typeof(this.docxList.多选) == "undefined"){
-				this.docxList.多选={}
+			if (typeof (this.docxList.多选) == "undefined") {
+				this.docxList.多选 = {}
 			}
-			if (typeof(this.docxList.不定项) == "undefined"){
-				this.docxList.不定项={}
+			if (typeof (this.docxList.不定项) == "undefined") {
+				this.docxList.不定项 = {}
 			}
-			if (typeof(this.docxList.判断) == "undefined"){
-				this.docxList.判断={}
+			if (typeof (this.docxList.判断) == "undefined") {
+				this.docxList.判断 = {}
 			}
-			if (typeof(this.docxList.填空) == "undefined"){
-				this.docxList.填空={}
+			if (typeof (this.docxList.填空) == "undefined") {
+				this.docxList.填空 = {}
 			}
-			if (typeof(this.docxList.简答) == "undefined"){
-				this.docxList.简答={}
+			if (typeof (this.docxList.简答) == "undefined") {
+				this.docxList.简答 = {}
 			}
-			if (typeof(this.docxList.未知) == "undefined"){
-				this.docxList.未知={}
+			if (typeof (this.docxList.未知) == "undefined") {
+				this.docxList.未知 = {}
 			}
 		},
-		preshowTitle:function(type,index){
-			this.currentDocx=this.docxList[type][index];
-			this.currentDocxShow="第"+(this.guanliDocxIndex+1)+"题."+ this.docxList[type][index];
-			if (this.currentDocx!="") {
-				this.guanliresult="加载文件"+this.currentDocx;
+		preshowTitle: function (type, index) {
+			this.currentDocx = this.docxList[type][index];
+			this.currentDocxShow = "第" + (this.guanliDocxIndex + 1) + "题." + this.docxList[type][index];
+			if (this.currentDocx != "") {
+				//this.guanliresult = "加载文件" + this.currentDocx;
 				this.showtitle(this.currentDocx);
 			}
 		},
-		prevTitle:function(){
-			this.guanliDocxIndex=this.guanliDocxIndex-1;
-			if (this.guanliDocxIndex<0){
-				this.guanliDocxIndex=0;
-				this.guanliresult="已经到["+this.guanliControl+"]开头";
-			}else{
+		prevTitle: function () {
+			this.guanliAction = "";
+			this.guanliDocxIndex = this.guanliDocxIndex - 1;
+			if (this.guanliDocxIndex < 0) {
+				this.guanliDocxIndex = 0;
+				this.guanliresult = "已经到[" + this.guanliControl + "]开头";
+			} else {
 				this.showDocx()
-			}			
+			}
 		},
-		nextTitle:function(){
-			this.guanliDocxIndex=this.guanliDocxIndex+1;
-			if (this.guanliControl=="全部"){
-				if (this.guanliDocxIndex>this.guanliDocxMaxIndex){
-					this.guanliDocxIndex=this.guanliDocxMaxIndex-1;
-					this.guanliresult="已经到["+this.guanliControl+"]末尾";
-				}else{
+		nextTitle: function () {
+			this.guanliAction = "";
+			this.guanliDocxIndex = this.guanliDocxIndex + 1;
+			if (this.guanliControl == "全部") {
+				if (this.guanliDocxIndex > this.guanliDocxMaxIndex) {
+					this.guanliDocxIndex = this.guanliDocxMaxIndex - 1;
+					this.guanliresult = "已经到[" + this.guanliControl + "]末尾";
+				} else {
 					this.showDocx()
 				}
-			}else{
-				if (this.guanliDocxIndex>this.docxList[this.guanliControl].length){
-					this.guanliDocxIndex=this.docxList[this.guanliControl].length-1;
-					this.guanliresult="已经到["+this.guanliControl+"]末尾";
-				}else{
+			} else {
+				if (this.guanliDocxIndex >= this.docxList[this.guanliControl].length) {
+					this.guanliDocxIndex = this.docxList[this.guanliControl].length - 1;
+					this.guanliresult = "已经到[" + this.guanliControl + "]末尾";
+				} else {
 					this.showDocx()
 				}
 			}
 		},
-		getMaxIndex:function(){
-			var type=["单选","多选","填空","判断","简答","不定项","未知"]
-			this.guanliDocxMaxIndex=0
-			var mv=tiku.$data
-			$.each(type,function(index,value){
-				mv.guanliDocxMaxIndex=mv.guanliDocxMaxIndex+mv.docxList[value].length;
+		getMaxIndex: function () {
+			var type = ["单选", "多选", "填空", "判断", "简答", "不定项", "未知"]
+			this.guanliDocxMaxIndex = 0
+			var mv = tiku.$data
+			$.each(type, function (index, value) {
+				mv.guanliDocxMaxIndex = mv.guanliDocxMaxIndex + mv.docxList[value].length;
 			});
 		},
-		showDocx:function(){
-			if (this.guanliControl!="全部"){
-				if (this.docxList[this.guanliControl].length>this.guanliDocxIndex && this.guanliDocxIndex>=0){
-					this.preshowTitle(this.guanliControl,this.guanliDocxIndex);
+		showDocx: function () {
+			if (this.guanliControl != "全部") {
+				if (this.docxList[this.guanliControl].length > this.guanliDocxIndex && this.guanliDocxIndex >= 0) {
+					this.preshowTitle(this.guanliControl, this.guanliDocxIndex);
 				}
-			}else{
-				var showindex=this.guanliDocxIndex
-				var type=["单选","多选","填空","判断","简答","不定项","未知"]
-				var mv=tiku.$data
-				var tv=tiku
-				$.each(type,function(index,value){
-					if ( showindex < mv.docxList[value].length){
-						tv.preshowTitle(value,showindex);
+			} else {
+				var showindex = this.guanliDocxIndex
+				var type = ["单选", "多选", "填空", "判断", "简答", "不定项", "未知"]
+				var mv = tiku.$data
+				var tv = tiku
+				$.each(type, function (index, value) {
+					if (showindex < mv.docxList[value].length) {
+						tv.preshowTitle(value, showindex);
 						return false;
-					}else{
-						showindex=showindex-mv.docxList[value].length;
+					} else {
+						showindex = showindex - mv.docxList[value].length;
 					}
-				});	
-			}	
-		},/**/
-		getDocxInfo:function(){
+				});
+			}
+		},
+		clearAera() {
+			$(textarea1).val("");
+			$(textarea2).val("");
+		},
+
+		getDocxInfo: function (pos) {
+			this.clearAera();
+			this.resetGetDocxInfo(pos);
 			this.getDocxList();
-			this.docxListCount=[{code:"单选",value:this.docxList.单选.length},
-			{code:"多选",value:this.docxList.多选.length},
-			{code:"填空",value:this.docxList.填空.length},
-			{code:"判断",value:this.docxList.判断.length},
-			{code:"简答",value:this.docxList.简答.length},
-			{code:"不定项",value:this.docxList.不定项.length},
-			{code:"未知",value:this.docxList.未知.length}]
+			this.docxListCount = [{ code: "单选", value: this.docxList.单选.length },
+			{ code: "多选", value: this.docxList.多选.length },
+			{ code: "填空", value: this.docxList.填空.length },
+			{ code: "判断", value: this.docxList.判断.length },
+			{ code: "简答", value: this.docxList.简答.length },
+			{ code: "不定项", value: this.docxList.不定项.length },
+			{ code: "未知", value: this.docxList.未知.length }]
 			this.getMaxIndex();
 			this.showDocx();
 		},
+		resetGetDocxInfo: function (pos) {
+			this.guanliDocxIndex = 0;
+			if (typeof(pos)!="undefined"){
+				this.guanliDocxIndex=pos;
+				if (this.guanliDocxIndex<0) this.guanliDocxIndex=0;
+			}
+			this.guanliDocxMaxIndex = 0;
+			//this.guanliresult = "";
+
+			this.docxList = {};
+			this.docxListCount = [];
+			this.currentDocx = "";
+			this.currentDocxShow = "";
+
+			this.guanliActionShow = "";
+			this.Vconform = false;
+			this.guanliConform = "";
+
+			this.guanliAction = "";
+			this.guanliMsg = "";
+		},
+		guanliDoAction:function(pos){			
+			var file=this.currentDocx;
+			var newfile=this.replaceAll(this.currentDocx,this.guanliControl,this.guanliMove);
+			var titleword=$(textarea1).val();
+			var answerword=$(textarea2).val();
+			var word={"filename":file,"title":titleword,"answer":answerword,"moveto":newfile};
+			var json = {};
+			json[this.guanliAction]=word;
+			this.guanliresult = "执行中....";
+			$.ajax({
+				type: "post",
+				dataType: "json",
+				//contentType:"application/json;charset=utf-8",
+				url: "api",
+				data: JSON.stringify(json),
+				async: false,
+				success: function (data) {
+					tiku.$data.guanliresult = data.info;
+				},
+				error: function (data) {
+					tiku.$data.guanliresult = "执行失败 " + data.responseJSON.error;
+					console.log(data.responseJSON.error);
+				}
+			});
+			//this.guanliresult="已经"+this.guanliMsg;
+			//if (this.guanliAction == "save") this.currentDocxShow = this.currentDocx;
+			this.guanliAction = "";
+			this.getDocxInfo(pos);
+		},
+		newTitle: function () {
+			if (this.guanliControl != "全部") {
+				this.clearAera();
+				this.guanliAction = "new";
+				this.clearAera();
+				this.guanliresult = "新增";
+				this.currentDocx = "试题库/" + this.guanliControl + "/" + Date.parse(new Date()) + ".docx";
+				this.currentDocxShow = "准备新增 " + this.currentDocx + " ，请保存前不要更换题目或者刷新，那样会丢失新增内容";
+			} else {
+				this.guanliresult = "新增操作题型无效，请不要选择‘全部’";
+			}
+		},
+		saveTitle: function () {
+			this.guanliAction = "save";
+			this.guanliMsg = "保存 " + this.currentDocx;
+			if ($("#fastconfirm")[0].checked) {
+				this.guanliDoAction(this.guanliDocxIndex);
+			} else {
+				this.guanliActionShow = this.guanliMsg;
+				this.Vconform = true;
+			}
+		},
+		delTitle: function () {
+			if (this.guanliAction == "new"){
+				this.guanliresult = "请先完成 " + this.currentDocx +"存档";
+				return 
+			}
+			this.guanliAction = "del";
+			this.guanliMsg = "删除 " + this.currentDocx;
+			if ($("#fastconfirm")[0].checked) {
+				this.guanliDoAction(this.guanliDocxIndex-1);
+			} else {
+				this.guanliActionShow =this.guanliMsg;
+				this.Vconform = true;
+			}
+		},
+		moveTitle: function () {
+			if (this.guanliAction == "new"){
+				this.guanliresult = "请先完成 " + this.currentDocx +"存档";
+				return 
+			}
+			if (this.guanliControl==this.guanliMove){
+				this.guanliresult = "目标相同，无须变动";
+				return 
+			}
+			this.guanliAction = "move";
+			this.guanliMsg = "移动 " + this.currentDocx + "到" + this.guanliMove;
+			if ($("#fastconfirm")[0].checked) {
+				this.guanliDoAction(this.guanliDocxIndex-1);
+			} else {
+				this.guanliActionShow = this.guanliMsg;
+				this.Vconform = true;
+			}
+		},
+		conform: function () {
+			if (this.guanliConform=="是") {
+				if (this.guanliAction != "save"){
+					this.guanliDoAction(this.guanliDocxIndex-1);
+				}else{
+					this.guanliDoAction(this.guanliDocxIndex);	
+				}
+			}
+			this.Vconform = false;			
+		},
 		getDocxList: function () {
-			var json = { "docxList": {"type":this.guanliControl,"answer":this.guanliContent} };
+			var json = { "docxList": { "type": this.guanliControl, "answer": this.guanliContent } };
 			this.initdocxList();
 			$.ajax({
 				type: "post",
@@ -595,53 +752,27 @@ var tiku = new Vue({
 				data: JSON.stringify(json),
 				async: false,
 				success: function (data) {
-					switch (tiku.$data.guanliControl) {
-						case "全部":
-							tiku.$data.docxList.单选 = data.单选;
-							tiku.$data.docxList.多选 = data.多选;
-							tiku.$data.docxList.不定项 = data.不定项;
-							tiku.$data.docxList.判断 = data.判断;
-							tiku.$data.docxList.填空 = data.填空;
-							tiku.$data.docxList.简答 = data.简答;
-							tiku.$data.docxList.未知 = data.未知;
-							break;
-						case "单选":
-							tiku.$data.docxList.单选 = data.单选;
-							break;
-						case "多选":
-							tiku.$data.docxList.多选 = data.多选;
-							break;
-						case "不定项":
-							tiku.$data.docxList.不定项 = data.不定项;
-							break;
-						case "判断":
-							tiku.$data.docxList.判断 = data.判断;
-							break;
-						case "填空":
-							tiku.$data.docxList.填空 = data.填空;
-							break;
-						case "简答":
-							tiku.$data.docxList.简答 = data.简答;
-							break;
-						case "未知":
-							tiku.$data.docxList.未知 = data.未知;
-							break;
-						default:
-					}
+					tiku.$data.docxList.单选 = data.单选;
+					tiku.$data.docxList.多选 = data.多选;
+					tiku.$data.docxList.不定项 = data.不定项;
+					tiku.$data.docxList.判断 = data.判断;
+					tiku.$data.docxList.填空 = data.填空;
+					tiku.$data.docxList.简答 = data.简答;
+					tiku.$data.docxList.未知 = data.未知;
 				},
 				error: function (data) {
-					console.log(data);
+					tiku.$data.guanliresult = "执行失败 " + data.responseJSON.error;
 				}
 			});
 		},
-		replaceAll:function(a,b,c){
-			var d=a.replace(b,c);
-			for(i=0;i<10;i++){
-				d=d.replace(b,c);
+		replaceAll: function (a, b, c) {
+			var d = a.replace(b, c);
+			for (i = 0; i < 10; i++) {
+				d = d.replace(b, c);
 			}
 			return d;
 		},
-		showtitle:function(docpath){
+		showtitle: function (docpath) {
 			var json = { "docxTitle": docpath };
 			this.initdocxList();
 			$.ajax({
@@ -657,10 +788,10 @@ var tiku = new Vue({
 					$(textarea2).val(data.answer);
 				},
 				error: function (data) {
-					console.log(data);
+					tiku.$data.guanliresult = "执行失败 " + data.responseJSON.error;
 				}
-			});	
-		},		
+			});
+		},
 		aaa: function () {
 			$.ajax({
 				/*
@@ -696,8 +827,8 @@ var setbackgroup = function () {
 	$("#guanli").height(div_h);
 	$("#classify").height(div_h);
 	$("#peizhi").height(div_h);
-	if (tiku.$data.docProperties.backgroupImage != "") {
-		$("body").css("background", "url(./themes/backgroup/" + tiku.$data.docProperties.backgroupImage + ")").css("background-repeat", "no-repeat").css("background-size", "100% 100%");
+	if (tiku.$data.p_background != "") {
+		$("body").css("background", "url(./themes/backgroup/" + tiku.$data.p_background + ")").css("background-repeat", "no-repeat").css("background-size", "100% 100%");
 	}
 
 };
@@ -706,6 +837,7 @@ var setbackgroup = function () {
 	tiku.FInitProperties();
 	tiku.FSetShow();
 	tiku.FgetTemplateList();
+	tiku.FgetBackgroundList();
 	tiku.setVisabled("Vchouti");
 	tiku.$data.showchoutifilename = "抓取试卷池指定试卷：";
 	$("#loadingModal").modal('hide');
