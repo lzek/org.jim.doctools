@@ -25,6 +25,21 @@ public class docFile {
 
 	}
 
+	public static ArrayList<String> getAllFileList(String path) {
+		ArrayList<String> lst = new ArrayList<String>();
+		String[] tmp = getAllFileArray(path);
+		if (tmp == null) {
+			log.error(path + "缺少试题");
+		}
+		for (String x : tmp) {
+			if (x.endsWith(".docx")) {
+				lst.add(x);
+			}
+		}
+		return lst;
+	}
+	
+	
 	public static ArrayList<String> getAllFileList(String path, String exclude) {
 		ArrayList<String> lst = new ArrayList<String>();
 		String[] tmp = getAllFileArray(path);
@@ -32,7 +47,7 @@ public class docFile {
 			log.error(path + "缺少试题");
 		}
 		for (String x : tmp) {
-			if (!x.contains(exclude)) {
+			if (!x.contains(exclude)&&x.endsWith(".docx")) {
 				lst.add(x);
 			}
 		}

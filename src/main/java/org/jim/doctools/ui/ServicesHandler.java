@@ -134,30 +134,31 @@ public class ServicesHandler extends HttpServlet {
 					responseOutWithJson(response, "{\"info\":\"已执行清除\"}", true);
 					break;
 				case "docxList":
-					String docxtype = (String)(json.get(key));
+					JSONObject nitem = (JSONObject) json.get(key);					
+					String docxtype = (String)(nitem.get("type"));
+					String docxAnswer = (String)(nitem.get("answer"));
 					String docxList="";
 					switch (docxtype) {
 					case "全部":
 					case "单选":
-						docxList="{ "+getSingleDocxListServices("单选",(docxtype.contentEquals("单选")||docxtype.contentEquals("全部")));
+						docxList="{ "+getSingleDocxListToJSON("单选",docxAnswer,(docxtype.contentEquals("单选")||docxtype.contentEquals("全部")));
 					case "多选":
-						docxList=docxList+", "+getSingleDocxListServices("多选",(docxtype.contentEquals("多选")||docxtype.contentEquals("全部")));
+						docxList=docxList+", "+getSingleDocxListToJSON("多选",docxAnswer,(docxtype.contentEquals("多选")||docxtype.contentEquals("全部")));
 					case "不定项":
-						docxList=docxList+", "+getSingleDocxListServices("不定项",(docxtype.contentEquals("不定项")||docxtype.contentEquals("全部")));
+						docxList=docxList+", "+getSingleDocxListToJSON("不定项",docxAnswer,(docxtype.contentEquals("不定项")||docxtype.contentEquals("全部")));
 					case "判断":
-						docxList=docxList+", "+getSingleDocxListServices("判断",(docxtype.contentEquals("判断")||docxtype.contentEquals("全部")));
+						docxList=docxList+", "+getSingleDocxListToJSON("判断",docxAnswer,(docxtype.contentEquals("判断")||docxtype.contentEquals("全部")));
 					case "填空":
-						docxList=docxList+", "+getSingleDocxListServices("填空",(docxtype.contentEquals("填空")||docxtype.contentEquals("全部")));
+						docxList=docxList+", "+getSingleDocxListToJSON("填空",docxAnswer,(docxtype.contentEquals("填空")||docxtype.contentEquals("全部")));
 					case "简答":
-						docxList=docxList+", "+getSingleDocxListServices("简答",(docxtype.contentEquals("简答")||docxtype.contentEquals("全部")));
+						docxList=docxList+", "+getSingleDocxListToJSON("简答",docxAnswer,(docxtype.contentEquals("简答")||docxtype.contentEquals("全部")));
 					case "未知":
-						docxList=docxList+", "+getSingleDocxListServices("未知",(docxtype.contentEquals("未知")||docxtype.contentEquals("全部"))) +"}";
+						docxList=docxList+", "+getSingleDocxListToJSON("未知",docxAnswer,(docxtype.contentEquals("未知")||docxtype.contentEquals("全部"))) +"}";
 					default:
-				}
-					
+				}					
 					responseOutWithJson(response, docxList, true);
 					break;
-				case "docxTitle":
+				case "docxTitle":					
 					String docxName = (String)(json.get(key));
 					String docxName_answer=docxName.replace(".docx", "_answer.docx");
 					JPoi jpoi=new JPoi();
@@ -167,12 +168,17 @@ public class ServicesHandler extends HttpServlet {
  					for(String x:title) {
  						titleword=titleword+x;
  					}
-					ArrayList<String> answer=jpoi.getContextRows(docxName_answer);
-					for(String x:answer) {
-						answerword=answerword+x;
- 					}
-					titleword=titleword.replaceAll("[\\r\\n]", "####");
-					answerword=answerword.replaceAll("[\\r\\n]", "####");
+ 					titleword=titleword.replaceAll("\\r", "\\\\r").replaceAll("\\n", "\\\\n");
+ 					try {
+ 						//处理无答案题目
+						ArrayList<String> answer=jpoi.getContextRows(docxName_answer);
+						for(String x:answer) {
+							answerword=answerword+x;
+	 					}					
+						answerword=answerword.replaceAll("\\r", "\\\\r").replaceAll("\\n", "\\\\n");
+					}catch(Exception e) {
+						log.debug(docxName+"没有答案");
+					}
 					String jsonword="{\"title\":\""+titleword+"\",\"answer\":\""+answerword+"\"}";
 					responseOutWithJson(response,jsonword , true);
 					break;
@@ -185,13 +191,41 @@ public class ServicesHandler extends HttpServlet {
 		}
 	}
 
-	private String getSingleDocxListServices(String type,Boolean canAccess) {
-		ArrayList<String> a =new ArrayList<String>();
-				if (canAccess ) {
-					a=docFile.getAllFileList("试题库/"+type, "_answer");
+	private String getSingleDocxListToJSON(String type,String docxAnswer,Boolean canAccess) {
+		if (type.equals("全部")) {
+			return null;
+		}
+		ArrayList<String> singleTypeList =new ArrayList<String>();
+		ArrayList<String> newList=new ArrayList<String> ();
+				if (canAccess ) {					
+					//遍历类型文件个数
+
+						singleTypeList=docFile.getAllFileList("试题库/"+type);
+						for(String docxname:singleTypeList) {
+							String newfullname="试题库/"+type+"/"+docxname;
+							switch(docxAnswer) {							
+							//按答案区分
+							case "all":
+								if (!docxname.contains("_answer")) {
+									newList.add(newfullname);
+								}
+								break;
+							case "OnlyWithoutAnswer":
+								if (!singleTypeList.contains(docxname.replace(".docx", "_answer.docx"))) {
+									newList.add(newfullname);
+								}
+								break;
+							case "OnlyWithAnswer":
+								if (singleTypeList.contains(docxname.replace(".docx", "_answer.docx"))) {
+									newList.add(newfullname);
+								}
+								break;
+							}
+						}
+						
 				}
 		String c="";
-		for(String b:a) {
+		for(String b:newList) {
 			if (c.equals("")) {
 				c="\""+b+"\"";
 			}else {

@@ -48,8 +48,12 @@ var tiku = new Vue({
 		guanliControl: "全部",
 		guanliControlList: ["全部", "单选", "多选", "填空", "判断", "简答", "不定项", "未知"],
 
-		guanliContent: "全部",
-		guanliContentList: ["全部", "只显示无答案问题", "显示未分类问题", "只显示含答案问题"],
+		guanliContent: "all",
+		guanliContentList: [{code:"all",name:"全部"}, {code:"OnlyWithoutAnswer",name:"只显示无答案问题"},  {code:"OnlyWithAnswer",name:"只显示含答案问题"}],
+
+		guanliDocxIndex:0,
+		guanliDocxMaxIndex:0,
+		guanliresult:"",
 
 		docxList: {},
 		docxListCount:[{code:"单选",value:0},
@@ -59,7 +63,8 @@ var tiku = new Vue({
 		{code:"简答",value:0},
 		{code:"不定项",value:0},
 		{code:"未知",value:0}],
-		currentDocx:""
+		currentDocx:"",
+		currentDocxShow:""
 
 
 	},
@@ -175,11 +180,6 @@ var tiku = new Vue({
 		FNav: function (type) {
 			this.FInitProperties();
 			this.setVisabled(type);
-			switch (type) {
-				case "Vguanli":
-					this.getDocxList(this.guanliContent);
-					break;
-			}
 		},
 		FgetTemplateList: function () {
 			var json = { "properties": {} };
@@ -508,8 +508,83 @@ var tiku = new Vue({
 				this.docxList.未知={}
 			}
 		},
-		getDocxList: function (type) {
-			var json = { "docxList": type };
+		preshowTitle:function(type,index){
+			this.currentDocx=this.docxList[type][index];
+			this.currentDocxShow="第"+(this.guanliDocxIndex+1)+"题."+ this.docxList[type][index];
+			if (this.currentDocx!="") {
+				this.guanliresult="加载文件"+this.currentDocx;
+				this.showtitle(this.currentDocx);
+			}
+		},
+		prevTitle:function(){
+			this.guanliDocxIndex=this.guanliDocxIndex-1;
+			if (this.guanliDocxIndex<0){
+				this.guanliDocxIndex=0;
+				this.guanliresult="已经到["+this.guanliControl+"]开头";
+			}else{
+				this.showDocx()
+			}			
+		},
+		nextTitle:function(){
+			this.guanliDocxIndex=this.guanliDocxIndex+1;
+			if (this.guanliControl=="全部"){
+				if (this.guanliDocxIndex>this.guanliDocxMaxIndex){
+					this.guanliDocxIndex=this.guanliDocxMaxIndex-1;
+					this.guanliresult="已经到["+this.guanliControl+"]末尾";
+				}else{
+					this.showDocx()
+				}
+			}else{
+				if (this.guanliDocxIndex>this.docxList[this.guanliControl].length){
+					this.guanliDocxIndex=this.docxList[this.guanliControl].length-1;
+					this.guanliresult="已经到["+this.guanliControl+"]末尾";
+				}else{
+					this.showDocx()
+				}
+			}
+		},
+		getMaxIndex:function(){
+			var type=["单选","多选","填空","判断","简答","不定项","未知"]
+			this.guanliDocxMaxIndex=0
+			var mv=tiku.$data
+			$.each(type,function(index,value){
+				mv.guanliDocxMaxIndex=mv.guanliDocxMaxIndex+mv.docxList[value].length;
+			});
+		},
+		showDocx:function(){
+			if (this.guanliControl!="全部"){
+				if (this.docxList[this.guanliControl].length>this.guanliDocxIndex && this.guanliDocxIndex>=0){
+					this.preshowTitle(this.guanliControl,this.guanliDocxIndex);
+				}
+			}else{
+				var showindex=this.guanliDocxIndex
+				var type=["单选","多选","填空","判断","简答","不定项","未知"]
+				var mv=tiku.$data
+				var tv=tiku
+				$.each(type,function(index,value){
+					if ( showindex < mv.docxList[value].length){
+						tv.preshowTitle(value,showindex);
+						return false;
+					}else{
+						showindex=showindex-mv.docxList[value].length;
+					}
+				});	
+			}	
+		},/**/
+		getDocxInfo:function(){
+			this.getDocxList();
+			this.docxListCount=[{code:"单选",value:this.docxList.单选.length},
+			{code:"多选",value:this.docxList.多选.length},
+			{code:"填空",value:this.docxList.填空.length},
+			{code:"判断",value:this.docxList.判断.length},
+			{code:"简答",value:this.docxList.简答.length},
+			{code:"不定项",value:this.docxList.不定项.length},
+			{code:"未知",value:this.docxList.未知.length}]
+			this.getMaxIndex();
+			this.showDocx();
+		},
+		getDocxList: function () {
+			var json = { "docxList": {"type":this.guanliControl,"answer":this.guanliContent} };
 			this.initdocxList();
 			$.ajax({
 				type: "post",
@@ -520,7 +595,7 @@ var tiku = new Vue({
 				data: JSON.stringify(json),
 				async: false,
 				success: function (data) {
-					switch (type) {
+					switch (tiku.$data.guanliControl) {
 						case "全部":
 							tiku.$data.docxList.单选 = data.单选;
 							tiku.$data.docxList.多选 = data.多选;
@@ -558,21 +633,8 @@ var tiku = new Vue({
 					console.log(data);
 				}
 			});
-			this.docxListCount=[{code:"单选",value:this.docxList.单选.length},
-			{code:"多选",value:this.docxList.多选.length},
-			{code:"填空",value:this.docxList.填空.length},
-			{code:"判断",value:this.docxList.判断.length},
-			{code:"简答",value:this.docxList.简答.length},
-			{code:"不定项",value:this.docxList.不定项.length},
-			{code:"未知",value:this.docxList.未知.length}];
-			if (this.docxList.单选.length>0) {
-				this.currentDocx="试题库/单选/"+this.docxList.单选[0];
-			}
-			if (this.currentDocx!="") {
-				this.showtitle(this.currentDocx);
-			}
 		},
-		replaceAll(a,b,c){
+		replaceAll:function(a,b,c){
 			var d=a.replace(b,c);
 			for(i=0;i<10;i++){
 				d=d.replace(b,c);
@@ -591,8 +653,8 @@ var tiku = new Vue({
 				data: JSON.stringify(json),
 				async: false,
 				success: function (data) {
-					$(textarea1).val(tiku.replaceAll(data.title,"####","\r\n"));
-					$(textarea2).val(tiku.replaceAll(data.answer,"####","\r\n"));
+					$(textarea1).val(data.title);
+					$(textarea2).val(data.answer);
 				},
 				error: function (data) {
 					console.log(data);

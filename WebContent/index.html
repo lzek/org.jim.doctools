@@ -193,17 +193,20 @@
         <div id="guanliExporter"></div>
         <div id="guanliControl">
           <div id="guanliControl_type">
-            <div class="col-md-3 	col-lg-3">操作题型:
-              <select v-model="guanliControl" v-on:change='changeItem("guanliControl")'>
+            <div class="col-md-2 	col-lg-2">
+              <button type="button"  class="btn btn-warning " @click="getDocxInfo()">刷新/获取：</button>
+            </div>
+            <div class="col-md-1 	col-lg-1">操作题型:
+              <select v-model="guanliControl" v-on:change='guanliItem("guanliControl")'>
                 <option v-for="item in guanliControlList" v-bind:value="item">
                   {{ item }}
                 </option>
               </select>
             </div>
-            <div class="col-md-3 	col-lg-3">内容分类:
-              <select v-model="guanliContent" v-on:change='changeItem("guanliContent")'>
-                <option v-for="item in guanliContentList" v-bind:value="item">
-                  {{ item }}
+            <div class="col-md-1 	col-lg-1">内容分类:
+              <select v-model="guanliContent" v-on:change='guanliItem("guanliContent")'>
+                <option v-for="item in guanliContentList" v-bind:value="item.code">
+                  {{ item.name }}
                 </option>
               </select>
             </div>
@@ -216,8 +219,8 @@
             </ul>
           </div>
           <div id="guanliControl_item" class="col-md-12 	col-lg-12">
-            <button type="button" class="btn btn-info ">上一条</button>
-            <button type="button" class="btn btn-info ">下一条</button>
+            <button type="button" class="btn btn-info " @click="prevTitle()">上一条</button>
+            <button type="button" class="btn btn-info " @click="nextTitle()">下一条</button>
             <button type="button" class="btn btn-primary ">新增</button>
             <button type="button" class="btn btn-success ">保存</button>
             <button type="button" class="btn btn-danger ">删除</button>
@@ -225,15 +228,15 @@
           </div>
         </div>
         <div id="guanliView" class="col-md-12 	col-lg-12">
-          <div class="col-md-12 	col-lg-12">查看内容：{{ currentDocx }}</div>
+          <div class="col-md-12 	col-lg-12">查看内容：{{ currentDocxShow }}</div>
           <div id="title" class="col-md-6 	col-lg-6 aaa"><textarea id="textarea1" class="form-control"
               rows="20"></textarea></div>
           <div id="title_answer" class="col-md-6 	col-lg-6 bbb"><textarea id="textarea2" class="form-control"
               rows="20"></textarea></div>
         </div>
-        <div class="col-md-2 col-md-offset-10"><button @click="aaa()">test</button><button @click="bbb()">bbb</button>
-        </div>
-        <div class="col-md-12 	col-lg-12">{{ quchongresult }}</div>
+        <!--<div class="col-md-2 col-md-offset-10"><button @click="aaa()">test</button><button @click="bbb()">bbb</button>
+        </div>-->
+        <div class="col-md-12 	col-lg-12">{{ guanliControl }}</div>
       </div>
 
       <div id="classify" class="col-md-12 	col-lg-12" v-show="Vclassify">
