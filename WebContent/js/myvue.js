@@ -210,7 +210,7 @@ var tiku = new Vue({
 					console.log(data);
 				}
 			});
-		},		
+		},	
 		FgetTemplateList: function () {
 			var json = { "properties": {} };
 			$.ajax({
@@ -607,11 +607,10 @@ var tiku = new Vue({
 				});
 			}
 		},
-		clearAera() {
+		clearAera:function() {
 			$(textarea1).val("");
 			$(textarea2).val("");
 		},
-
 		getDocxInfo: function (pos) {
 			this.clearAera();
 			this.resetGetDocxInfo(pos);
@@ -671,8 +670,6 @@ var tiku = new Vue({
 					console.log(data.responseJSON.error);
 				}
 			});
-			//this.guanliresult="已经"+this.guanliMsg;
-			//if (this.guanliAction == "save") this.currentDocxShow = this.currentDocx;
 			this.guanliAction = "";
 			this.getDocxInfo(pos);
 		},
