@@ -60,7 +60,18 @@ public class MergerFolder {
 						try {
 							if (Percent == 100) {
 								if (drr.RepetitionPercentByByte(tmpA, tmpB) >= Percent) {
-									removeList.add(tmpB);
+									//File fileA=new File(tmpA.replace(".docx", "_answer.docx"));
+									//File fileB=new File(tmpB.replace(".docx", "_answer.docx"));
+									
+									String removeFile=tmpB;
+									
+									//答案优先/不优先、新导入优先/已有优先
+								//	if ( fileA.exists() && fileB.exists() ) {
+										
+									//}
+									
+									
+									removeList.add(removeFile);
 								}
 							}
 						} catch (Exception e) {
